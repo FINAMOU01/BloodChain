@@ -191,7 +191,7 @@ bloodchain/
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-org/bloodchain.git
+[git clone https://github.com/your-org/bloodchain.git](https://github.com/FINAMOU01/BloodChain.git)
 cd bloodchain
 ```
 
