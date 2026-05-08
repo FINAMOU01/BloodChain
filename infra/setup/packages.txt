@@ -1,0 +1,5 @@
+docker
+nginx
+k3s
+git
+curl
