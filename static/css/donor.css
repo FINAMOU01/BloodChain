@@ -1,0 +1,273 @@
+:root {
+  --red: #C0392B;
+  --red-dark: #922B21;
+  --dark: #1a1a2e;
+  --white: #FFFFFF;
+  --gray-bg: #F8F9FA;
+  --green: #16A34A;
+}
+
+/* Global */
+body {
+  background-color: var(--gray-bg);
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+}
+
+/* Navbar */
+.navbar-blood {
+  background-color: var(--red);
+}
+
+.navbar-blood .navbar-brand {
+  color: var(--white);
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.navbar-blood .nav-link {
+  color: rgba(255, 255, 255, 0.75);
+  transition: color 0.3s ease;
+}
+
+.navbar-blood .nav-link:hover {
+  color: var(--white);
+}
+
+.navbar-blood .nav-link.active {
+  color: var(--white);
+  font-weight: 600;
+}
+
+/* Page header / hero */
+.donor-hero {
+  background-color: var(--white);
+  text-align: center;
+  padding: 48px 24px 32px;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.donor-hero h1 {
+  color: var(--dark);
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.donor-hero p {
+  color: #6B7280;
+  font-size: 1rem;
+  margin-bottom: 0;
+}
+
+.donor-divider {
+  height: 3px;
+  width: 60px;
+  background-color: var(--red);
+  margin: 16px auto 0;
+  border-radius: 2px;
+}
+
+/* Registration form card */
+.donor-card {
+  background-color: var(--white);
+  border-radius: 12px;
+  padding: 36px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  max-width: 600px;
+  margin: 20px auto 40px auto;
+}
+
+.donor-card label {
+  font-weight: 500;
+  color: var(--dark);
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.donor-card .form-control {
+  border-color: #D1D5DB;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  padding: 10px 14px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.donor-card .form-control:focus {
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.15);
+  outline: none;
+}
+
+.donor-card .invalid-feedback {
+  display: block;
+  width: 100%;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #dc3545;
+  font-weight: 500;
+}
+
+.donor-card .form-control.is-invalid,
+.donor-card .form-select.is-invalid {
+  border-color: #dc3545;
+  background-image: none;
+}
+
+.donor-card .form-control.is-invalid:focus,
+.donor-card .form-select.is-invalid:focus {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25);
+}
+
+.donor-card .form-control.is-valid,
+.donor-card .form-select.is-valid {
+  border-color: var(--green);
+}
+
+.donor-card .form-control.is-valid:focus,
+.donor-card .form-select.is-valid:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
+}
+
+.donor-card .form-check-label {
+  font-size: 0.88rem;
+  color: #374151;
+  margin-left: 8px;
+}
+
+/* Submit button */
+.btn-donor {
+  background-color: var(--red);
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  width: 100%;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-donor:hover {
+  background-color: var(--red-dark);
+  color: var(--white);
+  text-decoration: none;
+}
+
+.btn-donor-outline {
+  background-color: transparent;
+  color: var(--red);
+  border: 2px solid var(--red);
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-donor-outline:hover {
+  background-color: var(--red);
+  color: var(--white);
+  text-decoration: none;
+}
+
+/* Login link below form */
+.donor-login-link {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 0.88rem;
+  color: #6B7280;
+}
+
+.donor-login-link a {
+  color: var(--red);
+  text-decoration: none;
+  font-weight: 500;
+  transition: text-decoration 0.2s ease;
+}
+
+.donor-login-link a:hover {
+  text-decoration: underline;
+}
+
+/* Confirmation page specific */
+.confirm-icon {
+  font-size: 4rem;
+  color: var(--green);
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.confirm-card {
+  background-color: var(--white);
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  max-width: 600px;
+  margin: 40px auto;
+}
+
+.confirm-card h2 {
+  color: var(--dark);
+  font-weight: 700;
+  text-align: center;
+}
+
+.confirm-card .table td {
+  font-size: 0.9rem;
+  color: #374151;
+  padding: 10px 0;
+}
+
+.confirm-card .table td:first-child {
+  font-weight: 600;
+  color: var(--dark);
+  width: 140px;
+}
+
+.confirm-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+/* Footer */
+.footer-dark {
+  background-color: var(--dark);
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  padding: 20px;
+  font-size: 0.85rem;
+  margin-top: 60px;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+  .donor-card {
+    padding: 20px;
+    margin: 20px auto;
+  }
+
+  .confirm-card {
+    padding: 20px;
+    margin: 20px auto;
+  }
+
+  .donor-hero h1 {
+    font-size: 1.5rem;
+  }
+
+  .confirm-buttons {
+    flex-direction: column;
+  }
+
+  .confirm-buttons > * {
+    width: 100%;
+  }
+}
