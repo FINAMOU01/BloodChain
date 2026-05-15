@@ -1,0 +1,37 @@
+# BloodChain — Required Jenkins Plugins
+# Install via: Manage Jenkins → Plugins → Available
+# Restart Jenkins after installing all plugins
+
+# ── Core Pipeline ──────────────────────────────
+Pipeline
+Pipeline: Declarative
+Pipeline: Multibranch
+Pipeline: GitHub Groovy Libraries
+Blue Ocean
+
+# ── GitHub Integration ─────────────────────────
+GitHub Integration Plugin
+GitHub Branch Source Plugin
+GitHub plugin
+Generic Webhook Trigger Plugin
+
+# ── Docker ─────────────────────────────────────
+Docker Pipeline
+Docker plugin
+docker-build-step
+
+# ── Credentials & Security ─────────────────────
+Credentials Binding Plugin
+SSH Agent Plugin
+SSH Credentials Plugin
+
+# ── Notifications & Reporting ──────────────────
+Build Timeout
+Timestamper
+Workspace Cleanup Plugin
+JUnit Plugin
+Cobertura Plugin
+
+# ── Kubernetes / K3s ───────────────────────────
+Kubernetes CLI Plugin
+Kubernetes Credentials Plugin
