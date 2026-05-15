@@ -1,0 +1,330 @@
+version: '3.8'
+
+services:
+  # ============================================================================
+  # INFRASTRUCTURE SERVICES
+  # ============================================================================
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: bloodchain-postgres
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-bloodchain}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bloodchain-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: bloodchain-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bloodchain-network
+
+  # ============================================================================
+  # CORE SERVICES
+  # ============================================================================
+
+  donor-service:
+    build:
+      context: ./services/donor-service
+      dockerfile: Dockerfile
+    container_name: bloodchain-donor-service
+    environment:
+      DEBUG: ${DEBUG:-False}
+      SECRET_KEY: ${SECRET_KEY:-your_secret_key_here}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_NAME: ${DB_NAME:-bloodchain}
+      REDIS_URL: redis://redis:6379/1
+      ALLOWED_HOSTS: localhost,127.0.0.1,donor-service
+    ports:
+      - "8001:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services/donor-service:/app
+    networks:
+      - bloodchain-network
+    restart: unless-stopped
+
+  hospital-service:
+    build:
+      context: ./services/hospital-service
+      dockerfile: Dockerfile
+    container_name: bloodchain-hospital-service
+    environment:
+      DEBUG: ${DEBUG:-False}
+      SECRET_KEY: ${SECRET_KEY:-your_secret_key_here}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_NAME: ${DB_NAME:-bloodchain}
+      REDIS_URL: redis://redis:6379/2
+      ALLOWED_HOSTS: localhost,127.0.0.1,hospital-service
+    ports:
+      - "8002:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services/hospital-service:/app
+    networks:
+      - bloodchain-network
+    restart: unless-stopped
+
+  blood-tracking-service:
+    build:
+      context: ./services/blood-tracking-service
+      dockerfile: Dockerfile
+    container_name: bloodchain-blood-tracking-service
+    environment:
+      DEBUG: ${DEBUG:-False}
+      SECRET_KEY: ${SECRET_KEY:-your_secret_key_here}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_NAME: ${DB_NAME:-bloodchain}
+      REDIS_URL: redis://redis:6379/3
+      ALLOWED_HOSTS: localhost,127.0.0.1,blood-tracking-service
+    ports:
+      - "8003:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services/blood-tracking-service:/app
+    networks:
+      - bloodchain-network
+    restart: unless-stopped
+
+  notifications-service:
+    build:
+      context: ./services/notifications-service
+      dockerfile: Dockerfile
+    container_name: bloodchain-notifications-service
+    environment:
+      DEBUG: ${DEBUG:-False}
+      SECRET_KEY: ${SECRET_KEY:-your_secret_key_here}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_NAME: ${DB_NAME:-bloodchain}
+      REDIS_URL: redis://redis:6379/4
+      ALLOWED_HOSTS: localhost,127.0.0.1,notifications-service
+    ports:
+      - "8004:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services/notifications-service:/app
+    networks:
+      - bloodchain-network
+    restart: unless-stopped
+
+  blockchain-gateway:
+    build:
+      context: ./services/blockchain-gateway
+      dockerfile: Dockerfile
+    container_name: bloodchain-blockchain-gateway
+    environment:
+      DEBUG: ${DEBUG:-False}
+      SECRET_KEY: ${SECRET_KEY:-your_secret_key_here}
+      WEB3_PROVIDER_URI: ${WEB3_PROVIDER_URI:-https://sepolia.infura.io/v3/YOUR-PROJECT-ID}
+      PRIVATE_KEY: ${PRIVATE_KEY:-}
+      CONTRACT_ADDRESS: ${CONTRACT_ADDRESS:-0x}
+      REDIS_URL: redis://redis:6379/5
+      ALLOWED_HOSTS: localhost,127.0.0.1,blockchain-gateway
+    ports:
+      - "8005:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services/blockchain-gateway:/app
+    networks:
+      - bloodchain-network
+    restart: unless-stopped
+
+  data-warehouse:
+    build:
+      context: ./services/data-warehouse
+      dockerfile: Dockerfile
+    container_name: bloodchain-data-warehouse
+    environment:
+      DEBUG: ${DEBUG:-False}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_NAME: ${DB_NAME:-bloodchain}
+      REDIS_URL: redis://redis:6379/6
+    ports:
+      - "8006:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services/data-warehouse:/app
+    networks:
+      - bloodchain-network
+    restart: unless-stopped
+
+  location-service:
+    build:
+      context: ./services/location-service
+      dockerfile: Dockerfile
+    container_name: bloodchain-location-service
+    environment:
+      DEBUG: ${DEBUG:-False}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_NAME: ${DB_NAME:-bloodchain}
+      REDIS_URL: redis://redis:6379/7
+    ports:
+      - "8007:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services/location-service:/app
+    networks:
+      - bloodchain-network
+    restart: unless-stopped
+
+  rewards-service:
+    build:
+      context: ./services/rewards-service
+      dockerfile: Dockerfile
+    container_name: bloodchain-rewards-service
+    environment:
+      DEBUG: ${DEBUG:-False}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_NAME: ${DB_NAME:-bloodchain}
+      REDIS_URL: redis://redis:6379/8
+    ports:
+      - "8008:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services/rewards-service:/app
+    networks:
+      - bloodchain-network
+    restart: unless-stopped
+
+  user-management:
+    build:
+      context: ./services/user-management
+      dockerfile: Dockerfile
+    container_name: bloodchain-user-management
+    environment:
+      DEBUG: ${DEBUG:-False}
+      SECRET_KEY: ${SECRET_KEY:-your_secret_key_here}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_NAME: ${DB_NAME:-bloodchain}
+      REDIS_URL: redis://redis:6379/0
+      ALLOWED_HOSTS: localhost,127.0.0.1,user-management
+    ports:
+      - "8009:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services/user-management:/app
+    networks:
+      - bloodchain-network
+    restart: unless-stopped
+
+  # ============================================================================
+  # API GATEWAY / REVERSE PROXY (Optional)
+  # ============================================================================
+
+  nginx:
+    image: nginx:alpine
+    container_name: bloodchain-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./infra/nginx/bloodchain.conf:/etc/nginx/conf.d/bloodchain.conf:ro
+    depends_on:
+      - donor-service
+      - hospital-service
+      - blood-tracking-service
+      - notifications-service
+      - blockchain-gateway
+      - data-warehouse
+      - location-service
+      - rewards-service
+      - user-management
+    networks:
+      - bloodchain-network
+    restart: unless-stopped
+
+# ============================================================================
+# VOLUMES
+# ============================================================================
+
+volumes:
+  postgres_data:
+  redis_data:
+
+# ============================================================================
+# NETWORKS
+# ============================================================================
+
+networks:
+  bloodchain-network:
+    driver: bridge
