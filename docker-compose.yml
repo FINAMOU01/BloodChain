@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # ============================================================================
   # INFRASTRUCTURE SERVICES
@@ -23,6 +21,7 @@ services:
       retries: 5
     networks:
       - bloodchain-network
+    restart: unless-stopped
 
   redis:
     image: redis:7-alpine
@@ -39,6 +38,49 @@ services:
       retries: 5
     networks:
       - bloodchain-network
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:7
+    container_name: bloodchain-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-admin}
+      MONGO_INITDB_DATABASE: bloodchain_rewards
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bloodchain-network
+    restart: unless-stopped
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: bloodchain-clickhouse
+    environment:
+      CLICKHOUSE_DB: bloodchain_warehouse
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-}
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+      - "9009:9009"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8123/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bloodchain-network
+    restart: unless-stopped
 
   # ============================================================================
   # CORE SERVICES
@@ -66,8 +108,12 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    volumes:
-      - ./services/donor-service:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
     networks:
       - bloodchain-network
     restart: unless-stopped
@@ -94,8 +140,12 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    volumes:
-      - ./services/hospital-service:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
     networks:
       - bloodchain-network
     restart: unless-stopped
@@ -122,8 +172,12 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    volumes:
-      - ./services/blood-tracking-service:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
     networks:
       - bloodchain-network
     restart: unless-stopped
@@ -150,8 +204,12 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    volumes:
-      - ./services/notifications-service:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
     networks:
       - bloodchain-network
     restart: unless-stopped
@@ -174,8 +232,12 @@ services:
     depends_on:
       redis:
         condition: service_healthy
-    volumes:
-      - ./services/blockchain-gateway:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
     networks:
       - bloodchain-network
     restart: unless-stopped
@@ -187,21 +249,23 @@ services:
     container_name: bloodchain-data-warehouse
     environment:
       DEBUG: ${DEBUG:-False}
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: ${DB_USER:-postgres}
-      DB_PASSWORD: ${DB_PASSWORD:-postgres}
-      DB_NAME: ${DB_NAME:-bloodchain}
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_PORT: 9000
+      CLICKHOUSE_DB: bloodchain_warehouse
       REDIS_URL: redis://redis:6379/6
     ports:
       - "8006:8000"
     depends_on:
-      postgres:
+      clickhouse:
         condition: service_healthy
       redis:
         condition: service_healthy
-    volumes:
-      - ./services/data-warehouse:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
     networks:
       - bloodchain-network
     restart: unless-stopped
@@ -219,6 +283,7 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
       DB_NAME: ${DB_NAME:-bloodchain}
       REDIS_URL: redis://redis:6379/7
+      ALLOWED_HOSTS: localhost,127.0.0.1,location-service
     ports:
       - "8007:8000"
     depends_on:
@@ -226,8 +291,12 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    volumes:
-      - ./services/location-service:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
     networks:
       - bloodchain-network
     restart: unless-stopped
@@ -239,21 +308,22 @@ services:
     container_name: bloodchain-rewards-service
     environment:
       DEBUG: ${DEBUG:-False}
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: ${DB_USER:-postgres}
-      DB_PASSWORD: ${DB_PASSWORD:-postgres}
-      DB_NAME: ${DB_NAME:-bloodchain}
+      MONGODB_URI: mongodb://${MONGO_USER:-admin}:${MONGO_PASSWORD:-admin}@mongo:27017/bloodchain_rewards?authSource=admin
       REDIS_URL: redis://redis:6379/8
+      ALLOWED_HOSTS: localhost,127.0.0.1,rewards-service
     ports:
       - "8008:8000"
     depends_on:
-      postgres:
+      mongo:
         condition: service_healthy
       redis:
         condition: service_healthy
-    volumes:
-      - ./services/rewards-service:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
     networks:
       - bloodchain-network
     restart: unless-stopped
@@ -280,14 +350,19 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    volumes:
-      - ./services/user-management:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
     networks:
       - bloodchain-network
     restart: unless-stopped
 
+
   # ============================================================================
-  # API GATEWAY / REVERSE PROXY (Optional)
+  # API GATEWAY / REVERSE PROXY
   # ============================================================================
 
   nginx:
@@ -320,6 +395,8 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  mongo_data:
+  clickhouse_data:
 
 # ============================================================================
 # NETWORKS

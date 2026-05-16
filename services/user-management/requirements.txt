@@ -1,2 +1,21 @@
-﻿Django==4.2.0
+﻿# Core Django framework and REST API
+Django==4.2.0
 djangorestframework==3.14.0
+
+# Database - PostgreSQL adapter
+psycopg2-binary==2.9.9
+
+# WSGI server for production deployment
+gunicorn==21.2.0
+
+# Caching and message broker - Redis client
+redis==5.0.1
+
+# JWT authentication for token-based auth
+PyJWT==2.12.1
+
+# CORS headers for cross-origin requests
+django-cors-headers==4.3.1
+
+# JWT token management for user authentication
+djangorestframework-simplejwt==5.3.0

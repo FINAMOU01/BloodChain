@@ -1,32 +1,56 @@
-# Build stage
-FROM python:3.11-slim as builder
+FROM python:3.11-slim AS builder
 
 WORKDIR /app
+
+# Install system dependencies needed for psycopg2
+RUN apt-get update && apt-get install -y \
+    gcc \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY requirements.txt .
 RUN pip install --user --no-cache-dir -r requirements.txt
 
-# Runtime stage
+# ── Runtime stage ──
 FROM python:3.11-slim
+
+# Install runtime system dependencies
+RUN apt-get update && apt-get install -y \
+    libpq5 \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user for security
+RUN groupadd -r bloodchain && useradd -r -g bloodchain bloodchain
 
 WORKDIR /app
 
 # Copy Python dependencies from builder
 COPY --from=builder /root/.local /root/.local
 
-# Set environment variables
 ENV PATH=/root/.local/bin:$PATH \
     PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1
+    PYTHONDONTWRITEBYTECODE=1 \
+    DJANGO_SETTINGS_MODULE=config.settings
+
+# Copy entrypoint first and make executable
+COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
 
 # Copy application code
-COPY . .
+COPY --chown=bloodchain:bloodchain . .
 
-# Health check (adjust as needed for your user management service)
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD python -c "import sys; sys.exit(0)" || exit 1
+# Create staticfiles directory
+RUN mkdir -p /app/staticfiles && \
+    chown -R bloodchain:bloodchain /app/staticfiles
 
-# Expose port
+# Switch to non-root user
+USER bloodchain
+
+# Proper healthcheck using curl (now installed)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8000/health/ || exit 1
+
 EXPOSE 8000
 
-# Run the application (adjust entry point based on your service type)
-CMD ["python", "app.py"]
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
