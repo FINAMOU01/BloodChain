@@ -8,8 +8,8 @@ gunicorn==21.2.0
 # Caching and message broker - Redis client
 redis==5.0.1
 
-# Ethereum blockchain interaction
-web3==6.10.0
+# Ethereum blockchain interaction - Use stable version compatible with Python 3.11
+web3==6.9.0
 
 # CORS headers for cross-origin requests
 django-cors-headers==4.3.1

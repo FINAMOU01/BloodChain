@@ -41,7 +41,7 @@ services:
     restart: unless-stopped
 
   mongo:
-    image: mongo:7
+    image: mongo:6.0
     container_name: bloodchain-mongo
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-admin}
@@ -74,7 +74,7 @@ services:
     volumes:
       - clickhouse_data:/var/lib/clickhouse
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8123/ping"]
+      test: ["CMD", "curl", "-f", "http://localhost:8123/ping"]
       interval: 10s
       timeout: 5s
       retries: 5

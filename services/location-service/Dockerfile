@@ -33,10 +33,13 @@ WORKDIR /app
 # Copy Python dependencies from builder
 COPY --from=builder /root/.local /root/.local
 
-# Make gunicorn and other executables readable/executable by non-root user
-RUN chmod -R a+rx /root/.local/bin
+# Ensure all scripts and libraries are readable by all users
+RUN chmod -R a+rx /root/.local/bin && \
+    chmod -R a+r /root/.local/lib && \
+    find /root/.local/lib -type d -exec chmod a+rx {} \;
 
 ENV PATH=/root/.local/bin:$PATH \
+    PYTHONPATH=/root/.local/lib/python3.11/site-packages \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 

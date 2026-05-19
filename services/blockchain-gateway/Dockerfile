@@ -27,6 +27,7 @@ WORKDIR /app
 COPY --from=builder /root/.local /root/.local
 
 ENV PATH=/root/.local/bin:$PATH \
+    PYTHONPATH=/app:/root/.local/lib/python3.11/site-packages \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 
@@ -42,4 +43,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 
 EXPOSE 8000
 
-CMD ["python", "-m", "blockchain_service"]
+CMD ["python", "blockchain_service.py"]
