@@ -1,0 +1,23 @@
+{
+  "name": "bloodchain",
+  "version": "1.0.0",
+  "description": "A web platform for blood donation management and traceability, built on a microservices architecture with Ethereum blockchain for immutable bag tracking.",
+  "main": "index.js",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^6.1.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FINAMOU01/BloodChain.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/FINAMOU01/BloodChain/issues"
+  },
+  "homepage": "https://github.com/FINAMOU01/BloodChain#readme"
+}

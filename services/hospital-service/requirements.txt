@@ -19,3 +19,4 @@ django-cors-headers==4.3.1
 
 # Query filtering for blood stock and inventory queries
 django-filter==23.3
+django-prometheus

@@ -16,3 +16,4 @@ django-cors-headers==4.3.1
 
 # Async task queue for sending notifications and alerts
 celery==5.3.4
+django-prometheus
