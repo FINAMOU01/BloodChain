@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blood Bag Timeline - BloodChain</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Hospital CSS (reusing for tracking portal) -->
+    <link rel="stylesheet" href="../../static/css/hospital.css">
+
+    <style>
+        /* Timeline Page Styles */
+        .timeline-filter-container {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .timeline-date-filter {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .timeline-date-filter input {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .timeline-date-filter input:focus {
+            outline: none;
+            border-color: var(--red);
+            box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.1);
+        }
+
+        .filter-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .timeline-filter-btn {
+            padding: 8px 14px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--white);
+            color: var(--text);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .timeline-filter-btn:hover,
+        .timeline-filter-btn.active {
+            background: var(--red);
+            color: var(--white);
+            border-color: var(--red);
+        }
+
+        /* Main Timeline Container */
+        .timeline-container {
+            position: relative;
+        }
+
+        .timeline-divider {
+            position: absolute;
+            left: 30px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--red), var(--red-light));
+        }
+
+        .timeline-events {
+            position: relative;
+            padding-left: 80px;
+        }
+
+        /* Timeline Event */
+        .timeline-event-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .timeline-event-card:hover {
+            box-shadow: 0 4px 12px rgba(185, 28, 28, 0.15);
+            border-color: var(--red);
+        }
+
+        .timeline-event-card::before {
+            content: '';
+            position: absolute;
+            left: -50px;
+            top: 24px;
+            width: 20px;
+            height: 20px;
+            background: var(--red);
+            border: 3px solid var(--white);
+            border-radius: 50%;
+            box-shadow: 0 0 0 2px var(--red);
+        }
+
+        .timeline-event-card.critical::before {
+            background: #EF4444;
+            box-shadow: 0 0 0 2px #EF4444;
+            animation: pulse-red 2s infinite;
+        }
+
+        @keyframes pulse-red {
+            0%, 100% { box-shadow: 0 0 0 2px #EF4444, 0 0 0 6px rgba(239, 68, 68, 0.3); }
+            50% { box-shadow: 0 0 0 2px #EF4444; }
+        }
+
+        .timeline-event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .event-time {
+            font-family: 'Playfair Display', serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--red);
+        }
+
+        .event-type {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--red-light);
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--red);
+            text-transform: uppercase;
+        }
+
+        .event-type.collected {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .event-type.processing {
+            background: #FEF08A;
+            color: #854D0E;
+        }
+
+        .event-type.transit {
+            background: #DBEAFE;
+            color: #0C4A6E;
+        }
+
+        .event-type.delivery {
+            background: #C7D2FE;
+            color: #312E81;
+        }
+
+        .event-type.used {
+            background: #DDD6FE;
+            color: #4C1D95;
+        }
+
+        .event-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .event-title i {
+            font-size: 18px;
+            color: var(--red);
+        }
+
+        /* Event Details Grid */
+        .event-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .event-detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .detail-item-label {
+            font-size: 11px;
+            color: var(--muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-item-value {
+            font-size: 13px;
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        /* Event Description */
+        .event-description {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .event-tags {
+            display: flex;
+            gap: 6px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .event-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            background: var(--cream);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        /* Status Indicator */
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-indicator.success {
+            color: var(--green);
+        }
+
+        .status-indicator.warning {
+            color: var(--orange);
+        }
+
+        .status-indicator.error {
+            color: var(--red);
+        }
+
+        /* Empty State */
+        .empty-timeline {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--muted);
+        }
+
+        .empty-timeline i {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.3;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .timeline-filter-container {
+                flex-direction: column;
+            }
+
+            .timeline-date-filter {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .timeline-date-filter input {
+                width: 100%;
+            }
+
+            .timeline-events {
+                padding-left: 50px;
+            }
+
+            .timeline-divider {
+                left: 15px;
+            }
+
+            .timeline-event-card::before {
+                left: -35px;
+            }
+
+            .event-details {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .timeline-event-card {
+                padding: 16px;
+            }
+
+            .timeline-events {
+                padding-left: 40px;
+            }
+
+            .timeline-divider {
+                left: 10px;
+            }
+
+            .timeline-event-card::before {
+                left: -30px;
+                width: 16px;
+                height: 16px;
+                border-width: 2px;
+            }
+
+            .event-title {
+                font-size: 13px;
+            }
+
+            .event-time {
+                font-size: 14px;
+            }
+
+            .event-details {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .event-type {
+                font-size: 10px;
+                padding: 4px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="d-flex">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="blood-drop-icon"></div>
+                <span>BloodChain</span>
+            </div>
+
+            <!-- Nav Links -->
+            <nav class="sidebar-nav">
+                <a href="bag_list.html" class="nav-link">
+                    <i class="bi bi-list-ul"></i>
+                    <span>Blood Bags</span>
+                </a>
+                <a href="bag_timeline.html" class="nav-link active">
+                    <i class="bi bi-clock-history"></i>
+                    <span>Timeline</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-graph-up"></i>
+                    <span>Analytics</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    <span>Locations</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <span>Alerts</span>
+                    <span class="nav-badge">2</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-gear-fill"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+
+            <!-- Footer -->
+            <div class="sidebar-footer">
+                <p>Tracking System</p>
+                <a href="#" class="logout-link">Logout</a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-content">
+            <!-- TOPBAR -->
+            <div class="topbar">
+                <div class="topbar-left">
+                    <div class="topbar-title">Blood Bag Timeline</div>
+                    <div class="topbar-date">May 23, 2026</div>
+                </div>
+                <div class="topbar-right">
+                    <i class="bi bi-clock-history" style="color: var(--red); font-size: 18px;"></i>
+                </div>
+            </div>
+
+            <!-- PAGE BODY -->
+            <div class="page-body">
+                <!-- Filters -->
+                <div class="timeline-filter-container">
+                    <div class="timeline-date-filter">
+                        <label class="filter-label">From:</label>
+                        <input type="date" value="2026-05-18">
+                    </div>
+                    <div class="timeline-date-filter">
+                        <label class="filter-label">To:</label>
+                        <input type="date" value="2026-05-23">
+                    </div>
+                    <button class="timeline-filter-btn">All Events</button>
+                    <button class="timeline-filter-btn">Collected</button>
+                    <button class="timeline-filter-btn">Processing</button>
+                    <button class="timeline-filter-btn">Transit</button>
+                    <button class="timeline-filter-btn">Delivered</button>
+                </div>
+
+                <!-- Timeline -->
+                <div class="timeline-container">
+                    <div class="timeline-divider"></div>
+                    <div class="timeline-events">
+                        <!-- Event 1: Critical Alert -->
+                        <div class="timeline-event-card critical">
+                            <div class="timeline-event-header">
+                                <div class="event-time">May 23, 14:45</div>
+                                <span class="event-type">Critical Alert</span>
+                            </div>
+                            <div class="event-title">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                Bag BAG-2024-00843 - Expiry Warning
+                            </div>
+                            <div class="event-details">
+                                <div class="event-detail-item">
+                                    <span class="detail-item-label">Bag ID</span>
+                                    <span class="detail-item-value">BAG-2024-00843</span>
+                                </div>
+                                <div class="event-detail-item">
+                                    <span class="detail-item-label">Days Remaining</span>
+                                    <span class="detail-item-value">3 days</span>
+                                </div>
+                                <div class="event-detail-item">
+                                    <span class="detail-item-label">Expiry Date</span>
+                                    <span class="detail-item-value">Jun 10, 2026</span>
+                                </div>
+                            </div>
+                            <div class="event-description">
+                                Blood bag O- is approaching expiry date. Recommended for immediate use or disposal if not used by Jun 10.
+                            </div>
+                            <div class="status-indicator warning">
+                                <i class="bi bi-exclamation-circle"></i>
+                                Urgent attention required
+                            </div>
+                        </div>
+
+                        <!-- Event 2: Delivery -->
+                        <div class="timeline-event-card">
+                            <div class="timeline-event-header">
+                                <div class="event-time">May 23, 11:30</div>
+                                <span class="event-type delivery">Delivery</span>
+                            </div>
+                            <div class="event-title">
+                                <i class="bi bi-check-circle"></i>
+                                Bag BAG-2024-00847 Delivered to Storage
+                            </div>
+                            <div class="event-details">
+                                <div class="event-detail-item">
+                                    <span class="detail-item-label">Bag ID</span>
+                                    <span class="detail-item-value">BAG-2024-00847</span>
+                                </div>
+                                <div class="event-detail-item">
+                                    <span class="detail-item-label">Destination</span>
+                                    <span class="detail-item-value">Centre Hospitalier</span>
+                                </div>
+                                <div class="event-detail-item">
+                                    <span class="detail-item-label">Storage Unit</span>
+                                    <span class="detail-item-value">Fridge A</span>
+                                </div>
+                            </div>
+                            <div class="event-description">
+                                Blood bag O+ successfully received and stored at Centre Hospitalier. Temperature verified: 2-6°C.
+                            </div>
+                            <div class="event-tags">
+                                <span class="event-tag">O+</span>
+                                <span class="event-tag">450mL</span>
+                                <span class="event-tag">Centre Hospitalier</span>
+                            </div>
+                            <div class="status-indicator success">
+                                <i class="bi bi-check-circle"></i>
+                                Delivered successfully
+                            </div>
+                        </div>
+
+                        <!-- Event 3: In Transit -->
+                        <div class="timeline-event-card">
+                            <div class="timeline-event-header">
+                                <div class="event-time">May 21, 10:15</div>
+                                <span class="event-type transit">In Transit</span>
+                            </div>
+                            <div class="event-title">
+                                <i class="bi bi-arrow-right"></i>
+                                Bag BAG-2024-00846 Left for Distribution
+                            </div>
+                            <div class="event-details">
+                                <div class="event-detail-item">
+                                    <span class="detail-item-label">Bag ID</span>
+                                    <span class="detail-item-value">BAG-2024-00846</span>
+                                </div>
+                                <div class="event-detail-item">
+                                    <span class="detail-item-label">From</span>
+                                    <span class="detail-item-value">Centre Hospitalier</span>
+                                </div>
+                                <div class="event-detail-item">
+                                    <span class="detail-item-label">To</span>
+                                    <span class="detail-item-value">Hôpital du Jour</span>
+                                </div>
+                            </div>
+                            <div class="event-description">
+                                Blood bag A- transferred to Hôpital du Jour for emergency use. Transported with temperature control.
+                            </div>
+                            <div class="event-tags">
+                                <span class="event-tag">A-</span>
+                                <span class="event-tag">500mL</span>
+                                <span class="event-tag">Emergency</span>
+                            </div>
+                            <div class="status-indicator success">
+                                <i class="bi bi-check-circle"></i>
+                                In transit
+                            </div>
+                        </div>
+
+                        <!-- Event 4: Processing Complete -->
+                        <div class="timeline-event-card">
+                            <div class="timeline-event-header">
+                                <div class="event-time">May 20, 09:00</div>
+                                <span class="event-type processing">Processing</span>
+                            </div>
+                            <div class="event-title">
+                                <i class="bi bi-check-circle"></i>
+                                Quality Tests Passed - Bag BAG-2024-00847
+                            </div>
+                            <div class="event-details">
+                                <div class="event-detail-item">
+                                    <span class="detail-item-label">Bag ID</span>
+                                    <span class="detail-item-value">BAG-2024-00847</span>
+                                </div>
+                                <div class="event-detail-item">
+                                    <span class="detail-item-label">Tests Performed</span>
+                                    <span class="detail-item-value">4/4 Passed</span>
+                                </div>
+                                <div class="event-detail-item">
+                                    <span class="detail-item-label">Tested By</span>
+                                    <span class="detail-item-value">Lab Tech - Marie</span>
+                                </div>
+                            </div>
+                            <div class="event-description">
+                                All screening tests completed: HIV (Negative), HBV (Negative), HCV (Negative), Syphilis (Negative). Bag cleared for storage and distribution.
+                            </div>
+                            <div class="event-tags">
+                                <span class="event-tag">HIV: Negative</span>
+                                <span class="event-tag">HBV: Negative</span>
+                                <span class="event-tag">HCV: Negative</span>
+                                <span class="event-tag">Syphilis: Negative</span>
+                            </div>
+                            <div class="status-indicator success">
+                                <i class="bi bi-check-circle"></i>
+                                All tests passed
+                            </div>
+                        </div>
+
+                        <!-- Event 5: Collection -->
+                        <div class="timeline-event-card">
+                            <div class="timeline-event-header">
+                                <div class="event-time">May 18, 09:30</div>
+                                <span class="event-type collected">Collected</span>
+                            </div>
+                            <div class="event-title">
+                                <i class="bi bi-droplet-fill"></i>
+                                Blood Collected - Bag BAG-2024-00847
+                            </div>
+                            <div class="event-details">
+                                <div class="event-detail-item">
+                                    <span class="detail-item-label">Bag ID</span>
+                                    <span class="detail-item-value">BAG-2024-00847</span>
+                                </div>
+                                <div class="event-detail-item">
+                                    <span class="detail-item-label">Donor ID</span>
+                                    <span class="detail-item-value">DON-2024-1256</span>
+                                </div>
+                                <div class="event-detail-item">
+                                    <span class="detail-item-label">Collected At</span>
+                                    <span class="detail-item-value">Centre Hospitalier</span>
+                                </div>
+                            </div>
+                            <div class="event-description">
+                                Blood collection from donor completed successfully. Blood type: O+, Volume: 450mL. No adverse reactions reported during collection.
+                            </div>
+                            <div class="event-tags">
+                                <span class="event-tag">O+ Blood Type</span>
+                                <span class="event-tag">450mL Volume</span>
+                                <span class="event-tag">CPDA Anticoagulant</span>
+                            </div>
+                            <div class="status-indicator success">
+                                <i class="bi bi-check-circle"></i>
+                                Collection successful
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Timeline interactions could be added here
+        document.querySelectorAll('.timeline-filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.timeline-filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

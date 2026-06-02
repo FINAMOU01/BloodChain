@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Appointments — BloodChain</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Donor CSS -->
+    <link rel="stylesheet" href="../../static/css/donor.css">
+
+    <style>
+        /* Appointments Specific Styles */
+        .appointments-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .appointment-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .appointment-tab {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .appointment-tab.active {
+            color: var(--red);
+            border-bottom-color: var(--red);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .appointment-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .appointment-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border-color: var(--red);
+        }
+
+        .appointment-card-header {
+            background: linear-gradient(135deg, var(--red) 0%, #a01818 100%);
+            padding: 20px;
+            color: var(--white);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .appointment-header-left h3 {
+            margin: 0 0 4px 0;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .appointment-header-left p {
+            margin: 0;
+            font-size: 13px;
+            opacity: 0.95;
+        }
+
+        .appointment-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .appointment-card-body {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .appointment-detail {
+            display: flex;
+            gap: 12px;
+        }
+
+        .appointment-detail-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--red-light);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--red);
+            flex-shrink: 0;
+            font-size: 18px;
+        }
+
+        .appointment-detail-content h4 {
+            margin: 0 0 4px 0;
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .appointment-detail-content p {
+            margin: 0;
+            font-size: 14px;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .appointment-card-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-small.primary {
+            background: var(--red);
+            color: var(--white);
+        }
+
+        .btn-small.primary:hover {
+            background: #a01818;
+        }
+
+        .btn-small.secondary {
+            background: var(--border);
+            color: var(--text);
+        }
+
+        .btn-small.secondary:hover {
+            background: #d4c4b4;
+        }
+
+        .btn-small.danger {
+            background: var(--red-light);
+            color: var(--red);
+        }
+
+        .btn-small.danger:hover {
+            background: #fee2e2;
+        }
+
+        .schedule-form {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .schedule-form h3 {
+            margin: 0 0 20px 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .schedule-form h3 i {
+            color: var(--red);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text);
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--red);
+            box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.1);
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--red);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: #a01818;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--border);
+            color: var(--text);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--white);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            color: var(--border);
+            margin-bottom: 16px;
+        }
+
+        .empty-state h3 {
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .appointment-card-body {
+                grid-template-columns: 1fr;
+            }
+
+            .appointment-card-header {
+                flex-direction: column;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .form-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .appointment-card-footer {
+                flex-direction: column;
+            }
+
+            .btn-small {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="d-flex">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <!-- Logo -->
+            <div class="sidebar-logo">
+                <div class="blood-drop-icon"></div>
+                <span>BloodChain</span>
+            </div>
+
+            <!-- Nav Links -->
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-link">
+                    <i class="bi bi-house-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="donor_history.html" class="nav-link">
+                    <i class="bi bi-heart-pulse"></i>
+                    <span>My Donations</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-hospital"></i>
+                    <span>Nearby Hospitals</span>
+                </a>
+                <a href="donor_appointments.html" class="nav-link active">
+                    <i class="bi bi-calendar-check"></i>
+                    <span>Appointments</span>
+                </a>
+                <a href="donor_eligibility.html" class="nav-link">
+                    <i class="bi bi-shield-check"></i>
+                    <span>My Eligibility</span>
+                </a>
+                <a href="donor_rewards.html" class="nav-link">
+                    <i class="bi bi-gift"></i>
+                    <span>Rewards & Points</span>
+                </a>
+                <a href="emergency_alerts.html" class="nav-link">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <span>Emergency Alerts</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-bell-fill"></i>
+                    <span>Notifications</span>
+                    <span class="nav-badge">2</span>
+                </a>
+                <a href="donor_profile.html" class="nav-link">
+                    <i class="bi bi-gear-fill"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+
+            <!-- Footer -->
+            <div class="sidebar-footer">
+                <p>John Doe</p>
+                <a href="#" class="logout-link">Logout</a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <!-- TOPBAR -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <h1 class="topbar-title">My Appointments</h1>
+                </div>
+                <div class="topbar-right">
+                    <span class="topbar-date">Thursday, May 23 2026</span>
+                    <div class="topbar-notification">
+                        <i class="bi bi-bell-fill"></i>
+                        <span class="notification-badge">2</span>
+                    </div>
+                    <div class="topbar-avatar">JD</div>
+                </div>
+            </header>
+
+            <!-- PAGE BODY -->
+            <div class="page-body">
+                <div class="appointments-container">
+                    <!-- SCHEDULE NEW APPOINTMENT -->
+                    <div class="schedule-form">
+                        <h3>
+                            <i class="bi bi-calendar-plus-fill"></i>
+                            Schedule New Appointment
+                        </h3>
+                        <form onsubmit="handleSchedule(event)">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="hospital">Select Hospital</label>
+                                    <select id="hospital" required>
+                                        <option value="">-- Choose a hospital --</option>
+                                        <option value="centre">Centre Hospitalier de Yaoundé</option>
+                                        <option value="hopital-du-jour">Hôpital du Jour</option>
+                                        <option value="clinique-vie">Clinique de la Vie</option>
+                                        <option value="centre-medical">Centre Médical</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="appointment-date">Appointment Date</label>
+                                    <input type="date" id="appointment-date" min="2026-05-24" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="appointment-time">Preferred Time</label>
+                                    <input type="time" id="appointment-time" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="appointment-type">Appointment Type</label>
+                                    <select id="appointment-type" required>
+                                        <option value="">-- Select type --</option>
+                                        <option value="regular">Regular Donation</option>
+                                        <option value="plasma">Plasma Donation</option>
+                                        <option value="follow-up">Follow-up Checkup</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-buttons">
+                                <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                                    Clear
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    Schedule Appointment
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- TABS -->
+                    <div class="appointment-tabs">
+                        <button class="appointment-tab active" onclick="switchTab('upcoming')">
+                            <i class="bi bi-calendar-check"></i>
+                            Upcoming (2)
+                        </button>
+                        <button class="appointment-tab" onclick="switchTab('past')">
+                            <i class="bi bi-clock-history"></i>
+                            Past (8)
+                        </button>
+                        <button class="appointment-tab" onclick="switchTab('cancelled')">
+                            <i class="bi bi-x-circle"></i>
+                            Cancelled (1)
+                        </button>
+                    </div>
+
+                    <!-- UPCOMING TAB -->
+                    <div id="upcoming" class="tab-content active">
+                        <!-- APPOINTMENT 1 -->
+                        <div class="appointment-card">
+                            <div class="appointment-card-header">
+                                <div class="appointment-header-left">
+                                    <h3>Centre Hospitalier de Yaoundé</h3>
+                                    <p>Regular Blood Donation</p>
+                                </div>
+                                <span class="appointment-status">
+                                    <i class="bi bi-calendar-check-fill"></i>
+                                    Confirmed
+                                </span>
+                            </div>
+                            <div class="appointment-card-body">
+                                <div class="appointment-detail">
+                                    <div class="appointment-detail-icon">
+                                        <i class="bi bi-calendar-event"></i>
+                                    </div>
+                                    <div class="appointment-detail-content">
+                                        <h4>Date & Time</h4>
+                                        <p>June 18, 2026 at 10:00 AM</p>
+                                    </div>
+                                </div>
+                                <div class="appointment-detail">
+                                    <div class="appointment-detail-icon">
+                                        <i class="bi bi-geo-alt-fill"></i>
+                                    </div>
+                                    <div class="appointment-detail-content">
+                                        <h4>Location</h4>
+                                        <p>Avenue Kennedy, Yaoundé</p>
+                                    </div>
+                                </div>
+                                <div class="appointment-detail">
+                                    <div class="appointment-detail-icon">
+                                        <i class="bi bi-person-fill"></i>
+                                    </div>
+                                    <div class="appointment-detail-content">
+                                        <h4>Contact Person</h4>
+                                        <p>Dr. Antoine Dupuis</p>
+                                    </div>
+                                </div>
+                                <div class="appointment-detail">
+                                    <div class="appointment-detail-icon">
+                                        <i class="bi bi-telephone-fill"></i>
+                                    </div>
+                                    <div class="appointment-detail-content">
+                                        <h4>Phone</h4>
+                                        <p>+237 674 856 923</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="appointment-card-footer">
+                                <button class="btn-small secondary">
+                                    <i class="bi bi-pencil-fill"></i>
+                                    Reschedule
+                                </button>
+                                <button class="btn-small danger">
+                                    <i class="bi bi-x-circle"></i>
+                                    Cancel
+                                </button>
+                                <button class="btn-small primary">
+                                    <i class="bi bi-telephone-fill"></i>
+                                    Call Hospital
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- APPOINTMENT 2 -->
+                        <div class="appointment-card">
+                            <div class="appointment-card-header">
+                                <div class="appointment-header-left">
+                                    <h3>Hôpital du Jour</h3>
+                                    <p>Plasma Donation</p>
+                                </div>
+                                <span class="appointment-status">
+                                    <i class="bi bi-hourglass-split"></i>
+                                    Pending
+                                </span>
+                            </div>
+                            <div class="appointment-card-body">
+                                <div class="appointment-detail">
+                                    <div class="appointment-detail-icon">
+                                        <i class="bi bi-calendar-event"></i>
+                                    </div>
+                                    <div class="appointment-detail-content">
+                                        <h4>Date & Time</h4>
+                                        <p>June 25, 2026 at 2:00 PM</p>
+                                    </div>
+                                </div>
+                                <div class="appointment-detail">
+                                    <div class="appointment-detail-icon">
+                                        <i class="bi bi-geo-alt-fill"></i>
+                                    </div>
+                                    <div class="appointment-detail-content">
+                                        <h4>Location</h4>
+                                        <p>Rue de la Paix, Yaoundé</p>
+                                    </div>
+                                </div>
+                                <div class="appointment-detail">
+                                    <div class="appointment-detail-icon">
+                                        <i class="bi bi-person-fill"></i>
+                                    </div>
+                                    <div class="appointment-detail-content">
+                                        <h4>Contact Person</h4>
+                                        <p>Dr. Marie Samba</p>
+                                    </div>
+                                </div>
+                                <div class="appointment-detail">
+                                    <div class="appointment-detail-icon">
+                                        <i class="bi bi-telephone-fill"></i>
+                                    </div>
+                                    <div class="appointment-detail-content">
+                                        <h4>Phone</h4>
+                                        <p>+237 654 123 456</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="appointment-card-footer">
+                                <button class="btn-small secondary">
+                                    <i class="bi bi-pencil-fill"></i>
+                                    Reschedule
+                                </button>
+                                <button class="btn-small danger">
+                                    <i class="bi bi-x-circle"></i>
+                                    Cancel
+                                </button>
+                                <button class="btn-small primary">
+                                    <i class="bi bi-telephone-fill"></i>
+                                    Call Hospital
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PAST TAB -->
+                    <div id="past" class="tab-content">
+                        <div class="appointment-card">
+                            <div class="appointment-card-header">
+                                <div class="appointment-header-left">
+                                    <h3>Centre Hospitalier de Yaoundé</h3>
+                                    <p>Regular Blood Donation</p>
+                                </div>
+                                <span class="appointment-status">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    Completed
+                                </span>
+                            </div>
+                            <div class="appointment-card-body">
+                                <div class="appointment-detail">
+                                    <div class="appointment-detail-icon">
+                                        <i class="bi bi-calendar-event"></i>
+                                    </div>
+                                    <div class="appointment-detail-content">
+                                        <h4>Date & Time</h4>
+                                        <p>May 21, 2026 at 10:00 AM</p>
+                                    </div>
+                                </div>
+                                <div class="appointment-detail">
+                                    <div class="appointment-detail-icon">
+                                        <i class="bi bi-droplet-fill"></i>
+                                    </div>
+                                    <div class="appointment-detail-content">
+                                        <h4>Donation Amount</h4>
+                                        <p>500 mL Blood (O+)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CANCELLED TAB -->
+                    <div id="cancelled" class="tab-content">
+                        <div class="appointment-card">
+                            <div class="appointment-card-header">
+                                <div class="appointment-header-left">
+                                    <h3>Clinique de la Vie</h3>
+                                    <p>Regular Blood Donation</p>
+                                </div>
+                                <span class="appointment-status">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                    Cancelled
+                                </span>
+                            </div>
+                            <div class="appointment-card-body">
+                                <div class="appointment-detail">
+                                    <div class="appointment-detail-icon">
+                                        <i class="bi bi-calendar-event"></i>
+                                    </div>
+                                    <div class="appointment-detail-content">
+                                        <h4>Date & Time</h4>
+                                        <p>April 15, 2026 at 3:00 PM</p>
+                                    </div>
+                                </div>
+                                <div class="appointment-detail">
+                                    <div class="appointment-detail-icon">
+                                        <i class="bi bi-exclamation-circle"></i>
+                                    </div>
+                                    <div class="appointment-detail-content">
+                                        <h4>Cancellation Reason</h4>
+                                        <p>Low hemoglobin levels - Health concerns</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.appointment-tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.closest('.appointment-tab').classList.add('active');
+        }
+
+        function handleSchedule(event) {
+            event.preventDefault();
+            const hospital = document.getElementById('hospital').value;
+            const date = document.getElementById('appointment-date').value;
+            const time = document.getElementById('appointment-time').value;
+            const type = document.getElementById('appointment-type').value;
+            
+            alert(`Appointment scheduled!\n\nHospital: ${hospital}\nDate: ${date}\nTime: ${time}\nType: ${type}`);
+            resetForm();
+        }
+
+        function resetForm() {
+            document.querySelector('form').reset();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blood Stock Details — BloodChain</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Hospital CSS -->
+    <link rel="stylesheet" href="../../static/css/hospital.css">
+
+    <style>
+        /* Stock Detail Specific Styles */
+        .stock-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .stock-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stock-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--red);
+        }
+
+        .stock-card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stock-card-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--red-light);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--red);
+        }
+
+        .stock-card-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stock-quantity {
+            font-size: 32px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .stock-unit {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .stock-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.available {
+            background: var(--green);
+        }
+
+        .status-indicator.low {
+            background: var(--orange);
+        }
+
+        .status-indicator.critical {
+            background: var(--red);
+        }
+
+        .status-text {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .inventory-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--white);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .inventory-table thead th {
+            background: var(--red-light);
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .inventory-table tbody td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+            color: var(--text);
+        }
+
+        .inventory-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .blood-type-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background: var(--red-light);
+            color: var(--red);
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .quantity-badge {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .quantity-badge.available {
+            background: var(--green-light);
+            color: var(--green);
+        }
+
+        .quantity-badge.low {
+            background: var(--orange-light);
+            color: var(--orange);
+        }
+
+        .quantity-badge.critical {
+            background: var(--red-light);
+            color: var(--red);
+        }
+
+        .stock-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+
+        .btn-action {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--red);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: #a01818;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(185, 28, 28, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--border);
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            background: #d4c4b4;
+        }
+
+        .expiry-warning {
+            background: var(--orange-light);
+            border: 1px solid var(--orange);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .expiry-warning-icon {
+            font-size: 20px;
+            color: var(--orange);
+            flex-shrink: 0;
+        }
+
+        .expiry-warning-content h4 {
+            margin: 0 0 4px 0;
+            color: var(--text);
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .expiry-warning-content p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .chart-container {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 16px;
+            height: 200px;
+        }
+
+        .chart-bar {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bar {
+            width: 100%;
+            background: linear-gradient(135deg, var(--red), var(--red) 100%);
+            border-radius: 4px 4px 0 0;
+            transition: all 0.3s ease;
+        }
+
+        .bar:hover {
+            opacity: 0.8;
+            box-shadow: 0 4px 12px rgba(185, 28, 28, 0.2);
+        }
+
+        .bar-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text);
+            text-align: center;
+        }
+
+        @media (max-width: 1024px) {
+            .stock-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .inventory-table {
+                font-size: 12px;
+            }
+
+            .inventory-table thead th,
+            .inventory-table tbody td {
+                padding: 12px;
+            }
+
+            .stock-actions {
+                flex-direction: column;
+            }
+
+            .btn-action {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .chart-bars {
+                height: 150px;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="d-flex">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <!-- Logo -->
+            <div class="sidebar-logo">
+                <div class="blood-drop-icon"></div>
+                <span>BloodChain</span>
+            </div>
+
+            <!-- Nav Links -->
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-link">
+                    <i class="bi bi-house-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="stock_detail.html" class="nav-link active">
+                    <i class="bi bi-capsule"></i>
+                    <span>Blood Stock</span>
+                </a>
+                <a href="request_form.html" class="nav-link">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <span>Request Blood</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Donors Nearby</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-bell-fill"></i>
+                    <span>Notifications</span>
+                    <span class="nav-badge">3</span>
+                </a>
+                <a href="hospital_profile.html" class="nav-link">
+                    <i class="bi bi-gear-fill"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+
+            <!-- Footer -->
+            <div class="sidebar-footer">
+                <p>Centre Hospitalier</p>
+                <a href="#" class="logout-link">Logout</a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <!-- TOPBAR -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <h1 class="topbar-title">Blood Stock Details</h1>
+                </div>
+                <div class="topbar-right">
+                    <span class="topbar-date">Thursday, May 22 2026</span>
+                    <div class="topbar-notification">
+                        <i class="bi bi-bell-fill"></i>
+                        <span class="notification-badge">3</span>
+                    </div>
+                    <div class="topbar-avatar">HC</div>
+                </div>
+            </header>
+
+            <!-- PAGE BODY -->
+            <div class="page-body">
+                <!-- EXPIRY WARNING -->
+                <div class="expiry-warning">
+                    <div class="expiry-warning-icon">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                    </div>
+                    <div class="expiry-warning-content">
+                        <h4>Stock Expiry Alert</h4>
+                        <p>2 units of O- blood type expire in 3 days. Consider using them prioritize usage.</p>
+                    </div>
+                </div>
+
+                <!-- STOCK OVERVIEW CARDS -->
+                <div class="stock-container">
+                    <div class="stock-card">
+                        <div class="stock-card-header">
+                            <div class="stock-card-icon">
+                                <i class="bi bi-droplet-fill"></i>
+                            </div>
+                            <div class="stock-card-title">Total Units</div>
+                        </div>
+                        <div class="stock-quantity">47</div>
+                        <div class="stock-unit">liters in inventory</div>
+                        <div class="stock-status">
+                            <span class="status-indicator available"></span>
+                            <span class="status-text">Well stocked</span>
+                        </div>
+                    </div>
+
+                    <div class="stock-card">
+                        <div class="stock-card-header">
+                            <div class="stock-card-icon">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                            </div>
+                            <div class="stock-card-title">Critical Alerts</div>
+                        </div>
+                        <div class="stock-quantity">2</div>
+                        <div class="stock-unit">blood types low</div>
+                        <div class="stock-status">
+                            <span class="status-indicator critical"></span>
+                            <span class="status-text">Action required</span>
+                        </div>
+                    </div>
+
+                    <div class="stock-card">
+                        <div class="stock-card-header">
+                            <div class="stock-card-icon">
+                                <i class="bi bi-calendar-event"></i>
+                            </div>
+                            <div class="stock-card-title">Expiring Soon</div>
+                        </div>
+                        <div class="stock-quantity">5</div>
+                        <div class="stock-unit">units in next 7 days</div>
+                        <div class="stock-status">
+                            <span class="status-indicator low"></span>
+                            <span class="status-text">Monitor closely</span>
+                        </div>
+                    </div>
+
+                    <div class="stock-card">
+                        <div class="stock-card-header">
+                            <div class="stock-card-icon">
+                                <i class="bi bi-graph-up"></i>
+                            </div>
+                            <div class="stock-card-title">Last Updated</div>
+                        </div>
+                        <div class="stock-quantity">2h</div>
+                        <div class="stock-unit">ago</div>
+                        <div class="stock-status">
+                            <span class="status-indicator available"></span>
+                            <span class="status-text">Current data</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CHART -->
+                <div class="chart-container">
+                    <h3 class="chart-title">
+                        <i class="bi bi-bar-chart-fill"></i>
+                        Blood Type Distribution
+                    </h3>
+                    <div class="chart-bars">
+                        <div class="chart-bar">
+                            <div class="bar" style="height: 75%;"></div>
+                            <span class="bar-label">O+</span>
+                        </div>
+                        <div class="chart-bar">
+                            <div class="bar" style="height: 60%;"></div>
+                            <span class="bar-label">O-</span>
+                        </div>
+                        <div class="chart-bar">
+                            <div class="bar" style="height: 45%;"></div>
+                            <span class="bar-label">A+</span>
+                        </div>
+                        <div class="chart-bar">
+                            <div class="bar" style="height: 30%;"></div>
+                            <span class="bar-label">A-</span>
+                        </div>
+                        <div class="chart-bar">
+                            <div class="bar" style="height: 50%;"></div>
+                            <span class="bar-label">B+</span>
+                        </div>
+                        <div class="chart-bar">
+                            <div class="bar" style="height: 25%;"></div>
+                            <span class="bar-label">B-</span>
+                        </div>
+                        <div class="chart-bar">
+                            <div class="bar" style="height: 40%;"></div>
+                            <span class="bar-label">AB+</span>
+                        </div>
+                        <div class="chart-bar">
+                            <div class="bar" style="height: 15%;"></div>
+                            <span class="bar-label">AB-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- INVENTORY TABLE -->
+                <div class="chart-container" style="padding: 0; border: none;">
+                    <table class="inventory-table">
+                        <thead>
+                            <tr>
+                                <th>Blood Type</th>
+                                <th>Units Available</th>
+                                <th>Status</th>
+                                <th>Expiry Date</th>
+                                <th>Last Received</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="blood-type-badge">O+</span></td>
+                                <td>8.5L</td>
+                                <td><span class="quantity-badge available">Available</span></td>
+                                <td>May 28, 2026</td>
+                                <td>May 15, 2026</td>
+                                <td><a href="stock_update.html" style="color: var(--red); text-decoration: none; font-weight: 600;">Update</a></td>
+                            </tr>
+                            <tr>
+                                <td><span class="blood-type-badge">O-</span></td>
+                                <td>2.0L</td>
+                                <td><span class="quantity-badge critical">Critical</span></td>
+                                <td>May 25, 2026</td>
+                                <td>May 12, 2026</td>
+                                <td><a href="stock_update.html" style="color: var(--red); text-decoration: none; font-weight: 600;">Update</a></td>
+                            </tr>
+                            <tr>
+                                <td><span class="blood-type-badge">A+</span></td>
+                                <td>6.0L</td>
+                                <td><span class="quantity-badge available">Available</span></td>
+                                <td>June 02, 2026</td>
+                                <td>May 14, 2026</td>
+                                <td><a href="stock_update.html" style="color: var(--red); text-decoration: none; font-weight: 600;">Update</a></td>
+                            </tr>
+                            <tr>
+                                <td><span class="blood-type-badge">A-</span></td>
+                                <td>1.5L</td>
+                                <td><span class="quantity-badge low">Low</span></td>
+                                <td>May 30, 2026</td>
+                                <td>May 10, 2026</td>
+                                <td><a href="stock_update.html" style="color: var(--red); text-decoration: none; font-weight: 600;">Update</a></td>
+                            </tr>
+                            <tr>
+                                <td><span class="blood-type-badge">B+</span></td>
+                                <td>7.0L</td>
+                                <td><span class="quantity-badge available">Available</span></td>
+                                <td>June 01, 2026</td>
+                                <td>May 16, 2026</td>
+                                <td><a href="stock_update.html" style="color: var(--red); text-decoration: none; font-weight: 600;">Update</a></td>
+                            </tr>
+                            <tr>
+                                <td><span class="blood-type-badge">B-</span></td>
+                                <td>0.8L</td>
+                                <td><span class="quantity-badge critical">Critical</span></td>
+                                <td>May 26, 2026</td>
+                                <td>May 11, 2026</td>
+                                <td><a href="stock_update.html" style="color: var(--red); text-decoration: none; font-weight: 600;">Update</a></td>
+                            </tr>
+                            <tr>
+                                <td><span class="blood-type-badge">AB+</span></td>
+                                <td>5.5L</td>
+                                <td><span class="quantity-badge available">Available</span></td>
+                                <td>May 31, 2026</td>
+                                <td>May 13, 2026</td>
+                                <td><a href="stock_update.html" style="color: var(--red); text-decoration: none; font-weight: 600;">Update</a></td>
+                            </tr>
+                            <tr>
+                                <td><span class="blood-type-badge">AB-</span></td>
+                                <td>1.2L</td>
+                                <td><span class="quantity-badge low">Low</span></td>
+                                <td>May 29, 2026</td>
+                                <td>May 09, 2026</td>
+                                <td><a href="stock_update.html" style="color: var(--red); text-decoration: none; font-weight: 600;">Update</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- ACTION BUTTONS -->
+                <div class="stock-actions">
+                    <a href="dashboard.html" class="btn-action btn-secondary">
+                        <i class="bi bi-arrow-left"></i>
+                        Back to Dashboard
+                    </a>
+                    <a href="stock_update.html" class="btn-action btn-primary">
+                        <i class="bi bi-pencil-fill"></i>
+                        Update Stock
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

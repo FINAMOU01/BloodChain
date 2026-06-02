@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Blood — BloodChain</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Hospital CSS -->
+    <link rel="stylesheet" href="../../static/css/hospital.css">
+</head>
+<body>
+    <div class="d-flex">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <!-- Logo -->
+            <div class="sidebar-logo">
+                <div class="blood-drop-icon"></div>
+                <span>BloodChain</span>
+            </div>
+
+            <!-- Nav Links -->
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-link">
+                    <i class="bi bi-house-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-droplet-fill"></i>
+                    <span>Blood Stock</span>
+                </a>
+                <a href="request_form.html" class="nav-link active">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <span>Request Blood</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Donors Nearby</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-bell-fill"></i>
+                    <span>Notifications</span>
+                    <span class="nav-badge">3</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-gear-fill"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+
+            <!-- Footer -->
+            <div class="sidebar-footer">
+                <p>Centre Hospitalier</p>
+                <a href="#" class="logout-link">Logout</a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <!-- TOPBAR -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <h1 class="topbar-title">Request Blood</h1>
+                </div>
+                <div class="topbar-right">
+                    <span class="topbar-date">Thursday, May 22 2026</span>
+                    <div class="topbar-notification">
+                        <i class="bi bi-bell-fill"></i>
+                        <span class="notification-badge">3</span>
+                    </div>
+                    <div class="topbar-avatar">HC</div>
+                </div>
+            </header>
+
+            <!-- PAGE BODY -->
+            <div class="page-body">
+                <!-- REQUEST FORM SECTION -->
+                <div class="request-form-container">
+                    <div class="form-card">
+                        <!-- Header -->
+                        <div class="form-card-header">
+                            <div class="form-header-content">
+                                <h2 class="form-title">Submit Blood Request</h2>
+                                <p class="form-subtitle">Fill in the details below to request blood units for your hospital</p>
+                            </div>
+                            <div class="form-urgency-badge">
+                                <i class="bi bi-exclamation-circle-fill"></i>
+                                <span>Urgent requests prioritized</span>
+                            </div>
+                        </div>
+
+                        <form class="blood-request-form">
+                            <!-- BLOOD TYPE SECTION -->
+                            <div class="form-section">
+                                <h3 class="section-title">Blood Type Required</h3>
+                                <div class="blood-type-grid">
+                                    <label class="blood-type-option">
+                                        <input type="checkbox" name="blood_type" value="O-">
+                                        <span class="blood-type-label">O-</span>
+                                        <span class="blood-type-subtext">Universal</span>
+                                    </label>
+                                    <label class="blood-type-option">
+                                        <input type="checkbox" name="blood_type" value="O+">
+                                        <span class="blood-type-label">O+</span>
+                                        <span class="blood-type-subtext">Most common</span>
+                                    </label>
+                                    <label class="blood-type-option">
+                                        <input type="checkbox" name="blood_type" value="A+">
+                                        <span class="blood-type-label">A+</span>
+                                        <span class="blood-type-subtext"></span>
+                                    </label>
+                                    <label class="blood-type-option">
+                                        <input type="checkbox" name="blood_type" value="A-">
+                                        <span class="blood-type-label">A-</span>
+                                        <span class="blood-type-subtext"></span>
+                                    </label>
+                                    <label class="blood-type-option">
+                                        <input type="checkbox" name="blood_type" value="B+">
+                                        <span class="blood-type-label">B+</span>
+                                        <span class="blood-type-subtext"></span>
+                                    </label>
+                                    <label class="blood-type-option">
+                                        <input type="checkbox" name="blood_type" value="B-">
+                                        <span class="blood-type-label">B-</span>
+                                        <span class="blood-type-subtext"></span>
+                                    </label>
+                                    <label class="blood-type-option">
+                                        <input type="checkbox" name="blood_type" value="AB+">
+                                        <span class="blood-type-label">AB+</span>
+                                        <span class="blood-type-subtext">Rarest</span>
+                                    </label>
+                                    <label class="blood-type-option">
+                                        <input type="checkbox" name="blood_type" value="AB-">
+                                        <span class="blood-type-label">AB-</span>
+                                        <span class="blood-type-subtext">Rarest</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- UNITS & URGENCY SECTION -->
+                            <div class="form-section">
+                                <h3 class="section-title">Request Details</h3>
+                                <div class="form-grid-2">
+                                    <!-- Units Required -->
+                                    <div class="form-group">
+                                        <label for="units_required">
+                                            <i class="bi bi-droplet-fill"></i>
+                                            Units Required
+                                        </label>
+                                        <input type="number" id="units_required" name="units_required" min="1" max="100" placeholder="e.g., 5" required>
+                                    </div>
+
+                                    <!-- Urgency Level -->
+                                    <div class="form-group">
+                                        <label for="urgency">
+                                            <i class="bi bi-exclamation-triangle-fill"></i>
+                                            Urgency Level
+                                        </label>
+                                        <select id="urgency" name="urgency" required>
+                                            <option value="">Select urgency level...</option>
+                                            <option value="critical">Critical (Immediate)</option>
+                                            <option value="urgent">Urgent (Within 24 hours)</option>
+                                            <option value="standard">Standard (Within 48 hours)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- PATIENT INFORMATION SECTION -->
+                            <div class="form-section">
+                                <h3 class="section-title">Patient Information</h3>
+                                <div class="form-grid-2">
+                                    <!-- Patient Name -->
+                                    <div class="form-group">
+                                        <label for="patient_name">
+                                            <i class="bi bi-person-fill"></i>
+                                            Patient Name
+                                        </label>
+                                        <input type="text" id="patient_name" name="patient_name" placeholder="Full name" required>
+                                    </div>
+
+                                    <!-- Patient Blood Type -->
+                                    <div class="form-group">
+                                        <label for="patient_blood_type">
+                                            <i class="bi bi-droplet-fill"></i>
+                                            Patient Blood Type
+                                        </label>
+                                        <select id="patient_blood_type" name="patient_blood_type" required>
+                                            <option value="">Select blood type...</option>
+                                            <option value="O-">O-</option>
+                                            <option value="O+">O+</option>
+                                            <option value="A+">A+</option>
+                                            <option value="A-">A-</option>
+                                            <option value="B+">B+</option>
+                                            <option value="B-">B-</option>
+                                            <option value="AB+">AB+</option>
+                                            <option value="AB-">AB-</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Age -->
+                                    <div class="form-group">
+                                        <label for="patient_age">
+                                            <i class="bi bi-calendar-fill"></i>
+                                            Age
+                                        </label>
+                                        <input type="number" id="patient_age" name="patient_age" min="0" max="150" placeholder="e.g., 45" required>
+                                    </div>
+
+                                    <!-- Medical Condition -->
+                                    <div class="form-group">
+                                        <label for="medical_condition">
+                                            <i class="bi bi-heart-pulse"></i>
+                                            Medical Condition
+                                        </label>
+                                        <input type="text" id="medical_condition" name="medical_condition" placeholder="e.g., Surgery, Emergency" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- DEPARTMENT SECTION -->
+                            <div class="form-section">
+                                <h3 class="section-title">Department Information</h3>
+                                <div class="form-grid-2">
+                                    <!-- Department -->
+                                    <div class="form-group">
+                                        <label for="department">
+                                            <i class="bi bi-hospital"></i>
+                                            Department
+                                        </label>
+                                        <select id="department" name="department" required>
+                                            <option value="">Select department...</option>
+                                            <option value="emergency">Emergency Room</option>
+                                            <option value="surgery">Surgery</option>
+                                            <option value="icu">ICU</option>
+                                            <option value="cardiology">Cardiology</option>
+                                            <option value="orthopedics">Orthopedics</option>
+                                            <option value="trauma">Trauma Center</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Contact Person -->
+                                    <div class="form-group">
+                                        <label for="contact_person">
+                                            <i class="bi bi-telephone-fill"></i>
+                                            Contact Person
+                                        </label>
+                                        <input type="text" id="contact_person" name="contact_person" placeholder="Name of staff requesting" required>
+                                    </div>
+                                </div>
+
+                                <!-- Phone Number -->
+                                <div class="form-group">
+                                    <label for="phone_number">
+                                        <i class="bi bi-phone-fill"></i>
+                                        Phone Number
+                                    </label>
+                                    <input type="tel" id="phone_number" name="phone_number" placeholder="+237 6XX XXX XXX" required>
+                                </div>
+                            </div>
+
+                            <!-- NOTES SECTION -->
+                            <div class="form-section">
+                                <h3 class="section-title">Additional Notes</h3>
+                                <div class="form-group">
+                                    <label for="notes">
+                                        <i class="bi bi-pencil-fill"></i>
+                                        Special Instructions or Notes
+                                    </label>
+                                    <textarea id="notes" name="notes" rows="4" placeholder="Any special requirements, allergies, or additional information..."></textarea>
+                                </div>
+                            </div>
+
+                            <!-- ACTION BUTTONS -->
+                            <div class="form-actions">
+                                <a href="dashboard.html" class="btn-secondary">
+                                    <i class="bi bi-arrow-left"></i>
+                                    Back to Dashboard
+                                </a>
+                                <button type="submit" class="btn-submit">
+                                    <i class="bi bi-check-circle"></i>
+                                    Submit Request
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Form submission handler
+        document.querySelector('.blood-request-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Validate that at least one blood type is selected
+            const bloodTypes = document.querySelectorAll('input[name="blood_type"]:checked');
+            if (bloodTypes.length === 0) {
+                alert('Please select at least one blood type');
+                return;
+            }
+            
+            // In production, this would submit to the backend
+            alert('Blood request submitted successfully!');
+            // Optionally redirect back to dashboard
+            // window.location.href = 'dashboard.html';
+        });
+
+        // Show/hide urgency badge styling based on selection
+        const urgencySelect = document.getElementById('urgency');
+        urgencySelect.addEventListener('change', function() {
+            const badge = document.querySelector('.form-urgency-badge');
+            if (this.value === 'critical') {
+                badge.classList.add('critical');
+            } else {
+                badge.classList.remove('critical');
+            }
+        });
+    </script>
+</body>
+</html>

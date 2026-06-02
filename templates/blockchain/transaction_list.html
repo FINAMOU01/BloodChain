@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blockchain Transactions - BloodChain</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Hospital CSS (reusing for blockchain portal) -->
+    <link rel="stylesheet" href="../../static/css/hospital.css">
+
+    <style>
+        /* Blockchain Transaction List Styles */
+        .blockchain-header {
+            background: linear-gradient(135deg, var(--red) 0%, #7F1D1D 100%);
+            color: var(--white);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .blockchain-header-info h3 {
+            margin: 0 0 4px 0;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .blockchain-header-info p {
+            margin: 0;
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .blockchain-stats {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .blockchain-stat {
+            text-align: center;
+        }
+
+        .blockchain-stat-value {
+            font-size: 20px;
+            font-weight: 900;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .blockchain-stat-label {
+            font-size: 10px;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        /* Filter and Search Section */
+        .transaction-controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-input-group {
+            flex: 1;
+            min-width: 200px;
+            position: relative;
+        }
+
+        .search-input-group input {
+            width: 100%;
+            padding: 10px 12px 10px 36px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .search-input-group input:focus {
+            outline: none;
+            border-color: var(--red);
+            box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.1);
+        }
+
+        .search-input-group i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 14px;
+            border: 1px solid var(--border);
+            background: var(--white);
+            color: var(--text);
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: var(--red);
+            color: var(--white);
+            border-color: var(--red);
+        }
+
+        /* Transaction Cards */
+        .transactions-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .transaction-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .transaction-card:hover {
+            box-shadow: 0 4px 12px rgba(185, 28, 28, 0.15);
+            border-color: var(--red);
+        }
+
+        .transaction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .transaction-type {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .transaction-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--red-light);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--red);
+            font-size: 18px;
+        }
+
+        .transaction-type-name {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .transaction-type-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .transaction-type-subtitle {
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .transaction-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-confirmed {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .status-pending {
+            background: #FEF08A;
+            color: #854D0E;
+        }
+
+        .status-failed {
+            background: #FEE2E2;
+            color: #7F1D1D;
+        }
+
+        /* Transaction Details Grid */
+        .transaction-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 12px;
+            padding: 12px 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .detail-label {
+            font-size: 10px;
+            color: var(--muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            font-size: 12px;
+            color: var(--text);
+            font-weight: 600;
+            word-break: break-all;
+        }
+
+        .detail-value.hash {
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+        }
+
+        /* Transaction Meta */
+        .transaction-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .transaction-time {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .transaction-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .meta-btn {
+            padding: 4px 8px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .meta-btn:hover {
+            background: var(--red);
+            color: var(--white);
+            border-color: var(--red);
+        }
+
+        /* Transaction Amount */
+        .transaction-amount {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .amount-icon {
+            color: var(--red);
+            font-size: 14px;
+        }
+
+        /* Blockchain Verification Badge */
+        .blockchain-verified {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            background: #D1FAE5;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            color: #065F46;
+        }
+
+        /* Pagination */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 24px;
+        }
+
+        .pagination-btn {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            background: var(--white);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text);
+            transition: all 0.2s;
+        }
+
+        .pagination-btn:hover,
+        .pagination-btn.active {
+            background: var(--red);
+            color: var(--white);
+            border-color: var(--red);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--muted);
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.3;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .blockchain-header {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+
+            .blockchain-stats {
+                justify-content: center;
+            }
+
+            .transaction-controls {
+                flex-direction: column;
+            }
+
+            .search-input-group {
+                min-width: 100%;
+            }
+
+            .filter-buttons {
+                width: 100%;
+            }
+
+            .transaction-details {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .transaction-meta {
+                flex-direction: column;
+                gap: 8px;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .blockchain-header {
+                padding: 16px;
+            }
+
+            .transaction-card {
+                padding: 12px;
+            }
+
+            .transaction-header {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .transaction-details {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .detail-value.hash {
+                font-size: 10px;
+                max-width: 100px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .transaction-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 16px;
+            }
+
+            .transaction-type-title {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="d-flex">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="blood-drop-icon"></div>
+                <span>BloodChain</span>
+            </div>
+
+            <!-- Nav Links -->
+            <nav class="sidebar-nav">
+                <a href="transaction_list.html" class="nav-link active">
+                    <i class="bi bi-diagram-3"></i>
+                    <span>Transactions</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-box"></i>
+                    <span>Blocks</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-shield-check"></i>
+                    <span>Verification</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-graph-up"></i>
+                    <span>Analytics</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-key"></i>
+                    <span>Smart Contracts</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-gear-fill"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+
+            <!-- Footer -->
+            <div class="sidebar-footer">
+                <p>Blockchain</p>
+                <a href="#" class="logout-link">Logout</a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-content">
+            <!-- TOPBAR -->
+            <div class="topbar">
+                <div class="topbar-left">
+                    <div class="topbar-title">Blockchain Transactions</div>
+                    <div class="topbar-date">May 23, 2026</div>
+                </div>
+                <div class="topbar-right">
+                    <i class="bi bi-diagram-3" style="color: var(--red); font-size: 18px;"></i>
+                </div>
+            </div>
+
+            <!-- PAGE BODY -->
+            <div class="page-body">
+                <!-- Blockchain Header -->
+                <div class="blockchain-header">
+                    <div class="blockchain-header-info">
+                        <h3>⛓️ BloodChain Ledger</h3>
+                        <p>Immutable transaction record on the blockchain network</p>
+                    </div>
+                    <div class="blockchain-stats">
+                        <div class="blockchain-stat">
+                            <div class="blockchain-stat-value">2,847</div>
+                            <div class="blockchain-stat-label">Total Transactions</div>
+                        </div>
+                        <div class="blockchain-stat">
+                            <div class="blockchain-stat-value">156</div>
+                            <div class="blockchain-stat-label">Pending</div>
+                        </div>
+                        <div class="blockchain-stat">
+                            <div class="blockchain-stat-value">2691</div>
+                            <div class="blockchain-stat-label">Confirmed</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="transaction-controls">
+                    <div class="search-input-group">
+                        <i class="bi bi-search"></i>
+                        <input type="text" placeholder="Search by transaction hash, address, or bag ID..." onkeyup="filterTransactions()">
+                    </div>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" onclick="filterByType('all')">All</button>
+                        <button class="filter-btn" onclick="filterByType('donation')">Donation</button>
+                        <button class="filter-btn" onclick="filterByType('transfer')">Transfer</button>
+                        <button class="filter-btn" onclick="filterByType('usage')">Usage</button>
+                        <button class="filter-btn" onclick="filterByType('verification')">Verification</button>
+                    </div>
+                </div>
+
+                <!-- Transactions List -->
+                <div class="transactions-container">
+                    <!-- Transaction 1: Blood Collection -->
+                    <div class="transaction-card" data-type="donation">
+                        <div class="transaction-header">
+                            <div class="transaction-type">
+                                <div class="transaction-icon">
+                                    <i class="bi bi-droplet-fill"></i>
+                                </div>
+                                <div class="transaction-type-name">
+                                    <span class="transaction-type-title">Blood Donation Recorded</span>
+                                    <span class="transaction-type-subtitle">BAG-2024-00847</span>
+                                </div>
+                            </div>
+                            <div class="transaction-amount">
+                                <span class="amount-icon">+</span>
+                                450mL O+
+                            </div>
+                        </div>
+                        <div class="transaction-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Transaction Hash</span>
+                                <span class="detail-value hash">0x8f4e9c2a1b7d5f3e6c2a9b8d7e5f3c1a</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">From</span>
+                                <span class="detail-value">DON-2024-1256 (Alphonse Makos)</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">To</span>
+                                <span class="detail-value">Centre Hospitalier</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Block</span>
+                                <span class="detail-value">#8547</span>
+                            </div>
+                        </div>
+                        <div class="transaction-meta">
+                            <div class="transaction-time">
+                                <i class="bi bi-clock"></i>
+                                <span>May 18, 2026 at 09:30 AM</span>
+                            </div>
+                            <div class="transaction-actions">
+                                <span class="blockchain-verified">
+                                    <i class="bi bi-check-circle"></i>
+                                    Verified
+                                </span>
+                                <span class="status-confirmed">Confirmed</span>
+                                <button class="meta-btn">View Details</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transaction 2: Blood Transfer -->
+                    <div class="transaction-card" data-type="transfer">
+                        <div class="transaction-header">
+                            <div class="transaction-type">
+                                <div class="transaction-icon" style="background: #DBEAFE; color: #0C4A6E;">
+                                    <i class="bi bi-arrow-right"></i>
+                                </div>
+                                <div class="transaction-type-name">
+                                    <span class="transaction-type-title">Blood Transfer</span>
+                                    <span class="transaction-type-subtitle">BAG-2024-00846</span>
+                                </div>
+                            </div>
+                            <div class="transaction-amount">
+                                <span class="amount-icon">→</span>
+                                500mL A-
+                            </div>
+                        </div>
+                        <div class="transaction-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Transaction Hash</span>
+                                <span class="detail-value hash">0x5c3b7a9e2f4d8c1b6e3a9f7c2e5b8d1a</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">From</span>
+                                <span class="detail-value">Centre Hospitalier</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">To</span>
+                                <span class="detail-value">Hôpital du Jour (ER)</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Block</span>
+                                <span class="detail-value">#8543</span>
+                            </div>
+                        </div>
+                        <div class="transaction-meta">
+                            <div class="transaction-time">
+                                <i class="bi bi-clock"></i>
+                                <span>May 21, 2026 at 10:15 AM</span>
+                            </div>
+                            <div class="transaction-actions">
+                                <span class="blockchain-verified">
+                                    <i class="bi bi-check-circle"></i>
+                                    Verified
+                                </span>
+                                <span class="status-confirmed">Confirmed</span>
+                                <button class="meta-btn">View Details</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transaction 3: Blood Usage -->
+                    <div class="transaction-card" data-type="usage">
+                        <div class="transaction-header">
+                            <div class="transaction-type">
+                                <div class="transaction-icon" style="background: #FEE2E2; color: var(--red);">
+                                    <i class="bi bi-heart-pulse"></i>
+                                </div>
+                                <div class="transaction-type-name">
+                                    <span class="transaction-type-title">Blood Transfusion</span>
+                                    <span class="transaction-type-subtitle">Patient: Jean Pierre</span>
+                                </div>
+                            </div>
+                            <div class="transaction-amount">
+                                <span class="amount-icon">✓</span>
+                                Used
+                            </div>
+                        </div>
+                        <div class="transaction-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Transaction Hash</span>
+                                <span class="detail-value hash">0x2d6f8a3c5e9b1f4a7c2e8d5b9a3f6c1e</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Blood Bag</span>
+                                <span class="detail-value">BAG-2024-00846</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Hospital</span>
+                                <span class="detail-value">Hôpital du Jour</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Block</span>
+                                <span class="detail-value">#8539</span>
+                            </div>
+                        </div>
+                        <div class="transaction-meta">
+                            <div class="transaction-time">
+                                <i class="bi bi-clock"></i>
+                                <span>May 23, 2026 at 14:45 PM</span>
+                            </div>
+                            <div class="transaction-actions">
+                                <span class="blockchain-verified">
+                                    <i class="bi bi-check-circle"></i>
+                                    Verified
+                                </span>
+                                <span class="status-confirmed">Confirmed</span>
+                                <button class="meta-btn">View Details</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transaction 4: Quality Verification -->
+                    <div class="transaction-card" data-type="verification">
+                        <div class="transaction-header">
+                            <div class="transaction-type">
+                                <div class="transaction-icon" style="background: #D1FAE5; color: var(--green);">
+                                    <i class="bi bi-shield-check"></i>
+                                </div>
+                                <div class="transaction-type-name">
+                                    <span class="transaction-type-title">Quality Tests Passed</span>
+                                    <span class="transaction-type-subtitle">BAG-2024-00847</span>
+                                </div>
+                            </div>
+                            <div class="transaction-amount">
+                                <span class="amount-icon">✓</span>
+                                4/4 Tests
+                            </div>
+                        </div>
+                        <div class="transaction-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Transaction Hash</span>
+                                <span class="detail-value hash">0x7b2e9f4c1a3d8e5c6f2b9d7a1e4c8b3f</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Tests</span>
+                                <span class="detail-value">HIV, HBV, HCV, Syphilis</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Verified By</span>
+                                <span class="detail-value">Lab Tech - Marie Laurent</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Block</span>
+                                <span class="detail-value">#8541</span>
+                            </div>
+                        </div>
+                        <div class="transaction-meta">
+                            <div class="transaction-time">
+                                <i class="bi bi-clock"></i>
+                                <span>May 20, 2026 at 09:00 AM</span>
+                            </div>
+                            <div class="transaction-actions">
+                                <span class="blockchain-verified">
+                                    <i class="bi bi-check-circle"></i>
+                                    Verified
+                                </span>
+                                <span class="status-confirmed">Confirmed</span>
+                                <button class="meta-btn">View Details</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transaction 5: Reward Points Earned -->
+                    <div class="transaction-card" data-type="donation">
+                        <div class="transaction-header">
+                            <div class="transaction-type">
+                                <div class="transaction-icon" style="background: #FEF08A; color: #854D0E;">
+                                    <i class="bi bi-gift"></i>
+                                </div>
+                                <div class="transaction-type-name">
+                                    <span class="transaction-type-title">Reward Points Issued</span>
+                                    <span class="transaction-type-subtitle">Donation Incentive</span>
+                                </div>
+                            </div>
+                            <div class="transaction-amount">
+                                <span class="amount-icon">+</span>
+                                200 Points
+                            </div>
+                        </div>
+                        <div class="transaction-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Transaction Hash</span>
+                                <span class="detail-value hash">0x4a7c2d9f3e6b1a8c5f2e7d9b4c1a6e3f</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Donor</span>
+                                <span class="detail-value">Alphonse Makos (DON-2024-1256)</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Reason</span>
+                                <span class="detail-value">Blood Donation on May 18</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Block</span>
+                                <span class="detail-value">#8542</span>
+                            </div>
+                        </div>
+                        <div class="transaction-meta">
+                            <div class="transaction-time">
+                                <i class="bi bi-clock"></i>
+                                <span>May 19, 2026 at 10:30 AM</span>
+                            </div>
+                            <div class="transaction-actions">
+                                <span class="blockchain-verified">
+                                    <i class="bi bi-check-circle"></i>
+                                    Verified
+                                </span>
+                                <span class="status-confirmed">Confirmed</span>
+                                <button class="meta-btn">View Details</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transaction 6: Pending Transaction -->
+                    <div class="transaction-card" data-type="transfer">
+                        <div class="transaction-header">
+                            <div class="transaction-type">
+                                <div class="transaction-icon" style="background: #FEF08A; color: #854D0E;">
+                                    <i class="bi bi-hourglass-split"></i>
+                                </div>
+                                <div class="transaction-type-name">
+                                    <span class="transaction-type-title">Blood Transfer (Pending)</span>
+                                    <span class="transaction-type-subtitle">BAG-2024-00845</span>
+                                </div>
+                            </div>
+                            <div class="transaction-amount">
+                                <span class="amount-icon">→</span>
+                                450mL O-
+                            </div>
+                        </div>
+                        <div class="transaction-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Transaction Hash</span>
+                                <span class="detail-value hash">0x9e3f5a2c7b1d4e6a8c2f5b9d3e7a1c6f</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">From</span>
+                                <span class="detail-value">Centre Hospitalier</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">To</span>
+                                <span class="detail-value">Clinique de la Vie</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Block</span>
+                                <span class="detail-value">Pending...</span>
+                            </div>
+                        </div>
+                        <div class="transaction-meta">
+                            <div class="transaction-time">
+                                <i class="bi bi-clock"></i>
+                                <span>May 23, 2026 at 15:20 PM</span>
+                            </div>
+                            <div class="transaction-actions">
+                                <span style="display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; background: #FEF08A; border-radius: 4px; font-size: 10px; font-weight: 600; color: #854D0E;">
+                                    <i class="bi bi-hourglass-split"></i>
+                                    Awaiting Confirmation
+                                </span>
+                                <span class="status-pending">Pending</span>
+                                <button class="meta-btn">View Details</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination-container">
+                    <button class="pagination-btn" onclick="previousPage()">← Previous</button>
+                    <button class="pagination-btn active">1</button>
+                    <button class="pagination-btn">2</button>
+                    <button class="pagination-btn">3</button>
+                    <button class="pagination-btn">4</button>
+                    <span style="padding: 8px; color: var(--muted);">...</span>
+                    <button class="pagination-btn">24</button>
+                    <button class="pagination-btn" onclick="nextPage()">Next →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function filterTransactions() {
+            const searchInput = document.querySelector('.search-input-group input').value.toLowerCase();
+            const cards = document.querySelectorAll('.transaction-card');
+            
+            cards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                if (text.includes(searchInput)) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function filterByType(type) {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const cards = document.querySelectorAll('.transaction-card');
+            cards.forEach(card => {
+                if (type === 'all' || card.dataset.type === type) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function previousPage() {
+            alert('Loading previous page...');
+        }
+
+        function nextPage() {
+            alert('Loading next page...');
+        }
+    </script>
+</body>
+</html>

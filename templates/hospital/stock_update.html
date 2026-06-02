@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Blood Stock — BloodChain</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Hospital CSS -->
+    <link rel="stylesheet" href="../../static/css/hospital.css">
+
+    <style>
+        /* Stock Update Specific Styles */
+        .update-form-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .form-card {
+            background: var(--white);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .form-card-header {
+            background: linear-gradient(135deg, var(--red) 0%, #a01818 100%);
+            padding: 28px;
+            color: var(--white);
+        }
+
+        .form-card-header h2 {
+            margin: 0 0 8px 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .form-card-header p {
+            margin: 0;
+            opacity: 0.95;
+            font-size: 14px;
+        }
+
+        .form-card-body {
+            padding: 32px;
+        }
+
+        .form-section {
+            margin-bottom: 32px;
+        }
+
+        .form-section:last-of-type {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--red);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title i {
+            color: var(--red);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            color: var(--text);
+            transition: all 0.3s ease;
+            background: var(--white);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border: 2px solid var(--red);
+            box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: var(--muted);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .blood-type-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .blood-type-option {
+            position: relative;
+        }
+
+        .blood-type-option input[type="radio"] {
+            display: none;
+        }
+
+        .blood-type-option input[type="radio"] + label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: var(--white);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .blood-type-option input[type="radio"]:checked + label {
+            background: var(--red-light);
+            border-color: var(--red);
+            color: var(--red);
+        }
+
+        .blood-type-option input[type="radio"]:hover + label {
+            border-color: var(--red);
+        }
+
+        .input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-group input {
+            padding-right: 40px;
+        }
+
+        .input-group-suffix {
+            position: absolute;
+            right: 16px;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 600;
+            pointer-events: none;
+        }
+
+        .info-box {
+            background: var(--green-light);
+            border: 1px solid var(--green);
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .info-box-icon {
+            font-size: 20px;
+            color: var(--green);
+            flex-shrink: 0;
+        }
+
+        .info-box-content h4 {
+            margin: 0 0 4px 0;
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .info-box-content p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 32px;
+            padding-top: 32px;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--red);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: #a01818;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(185, 28, 28, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--border);
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            background: #d4c4b4;
+        }
+
+        .char-count {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 6px;
+        }
+
+        @media (max-width: 768px) {
+            .form-card-body {
+                padding: 20px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .blood-type-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .form-section {
+                margin-bottom: 24px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .form-card-header {
+                padding: 20px;
+            }
+
+            .form-card-header h2 {
+                font-size: 18px;
+            }
+
+            .blood-type-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="d-flex">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <!-- Logo -->
+            <div class="sidebar-logo">
+                <div class="blood-drop-icon"></div>
+                <span>BloodChain</span>
+            </div>
+
+            <!-- Nav Links -->
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-link">
+                    <i class="bi bi-house-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="stock_detail.html" class="nav-link active">
+                    <i class="bi bi-capsule"></i>
+                    <span>Blood Stock</span>
+                </a>
+                <a href="request_form.html" class="nav-link">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <span>Request Blood</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Donors Nearby</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-bell-fill"></i>
+                    <span>Notifications</span>
+                    <span class="nav-badge">3</span>
+                </a>
+                <a href="hospital_profile.html" class="nav-link">
+                    <i class="bi bi-gear-fill"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+
+            <!-- Footer -->
+            <div class="sidebar-footer">
+                <p>Centre Hospitalier</p>
+                <a href="#" class="logout-link">Logout</a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <!-- TOPBAR -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <h1 class="topbar-title">Update Blood Stock</h1>
+                </div>
+                <div class="topbar-right">
+                    <span class="topbar-date">Thursday, May 22 2026</span>
+                    <div class="topbar-notification">
+                        <i class="bi bi-bell-fill"></i>
+                        <span class="notification-badge">3</span>
+                    </div>
+                    <div class="topbar-avatar">HC</div>
+                </div>
+            </header>
+
+            <!-- PAGE BODY -->
+            <div class="page-body">
+                <div class="update-form-container">
+                    <!-- INFO BOX -->
+                    <div class="info-box">
+                        <div class="info-box-icon">
+                            <i class="bi bi-info-circle-fill"></i>
+                        </div>
+                        <div class="info-box-content">
+                            <h4>Important Update</h4>
+                            <p>All stock updates are timestamped and tracked for quality assurance. Ensure accuracy when entering quantities.</p>
+                        </div>
+                    </div>
+
+                    <!-- STOCK UPDATE FORM -->
+                    <form class="form-card">
+                        <!-- HEADER -->
+                        <div class="form-card-header">
+                            <h2>Stock Update Form</h2>
+                            <p>Update your current blood inventory levels and details</p>
+                        </div>
+
+                        <!-- BODY -->
+                        <div class="form-card-body">
+                            <!-- BLOOD TYPE SELECTION -->
+                            <div class="form-section">
+                                <h3 class="section-title">
+                                    <i class="bi bi-droplet-fill"></i>
+                                    Select Blood Type
+                                </h3>
+                                <div class="blood-type-grid">
+                                    <div class="blood-type-option">
+                                        <input type="radio" id="blood_o_pos" name="blood_type" value="O+">
+                                        <label for="blood_o_pos">O+</label>
+                                    </div>
+                                    <div class="blood-type-option">
+                                        <input type="radio" id="blood_o_neg" name="blood_type" value="O-">
+                                        <label for="blood_o_neg">O-</label>
+                                    </div>
+                                    <div class="blood-type-option">
+                                        <input type="radio" id="blood_a_pos" name="blood_type" value="A+">
+                                        <label for="blood_a_pos">A+</label>
+                                    </div>
+                                    <div class="blood-type-option">
+                                        <input type="radio" id="blood_a_neg" name="blood_type" value="A-">
+                                        <label for="blood_a_neg">A-</label>
+                                    </div>
+                                    <div class="blood-type-option">
+                                        <input type="radio" id="blood_b_pos" name="blood_type" value="B+">
+                                        <label for="blood_b_pos">B+</label>
+                                    </div>
+                                    <div class="blood-type-option">
+                                        <input type="radio" id="blood_b_neg" name="blood_type" value="B-">
+                                        <label for="blood_b_neg">B-</label>
+                                    </div>
+                                    <div class="blood-type-option">
+                                        <input type="radio" id="blood_ab_pos" name="blood_type" value="AB+">
+                                        <label for="blood_ab_pos">AB+</label>
+                                    </div>
+                                    <div class="blood-type-option">
+                                        <input type="radio" id="blood_ab_neg" name="blood_type" value="AB-">
+                                        <label for="blood_ab_neg">AB-</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- QUANTITY SECTION -->
+                            <div class="form-section">
+                                <h3 class="section-title">
+                                    <i class="bi bi-box"></i>
+                                    Quantity Details
+                                </h3>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="units">Units Available</label>
+                                        <div class="input-group">
+                                            <input type="number" id="units" name="units" placeholder="0" min="0" step="0.1" required>
+                                            <span class="input-group-suffix">Liters</span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="collection_date">Collection Date</label>
+                                        <input type="date" id="collection_date" name="collection_date" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="expiry_date">Expiry Date</label>
+                                        <input type="date" id="expiry_date" name="expiry_date" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="donation_center">Donation Center/Source</label>
+                                        <input type="text" id="donation_center" name="donation_center" placeholder="e.g., Red Cross Centre, Mobile Drive" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- DONOR INFORMATION -->
+                            <div class="form-section">
+                                <h3 class="section-title">
+                                    <i class="bi bi-person-fill"></i>
+                                    Donor Information
+                                </h3>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="donor_name">Donor Name</label>
+                                        <input type="text" id="donor_name" name="donor_name" placeholder="Full name" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="donor_id">Donor ID</label>
+                                        <input type="text" id="donor_id" name="donor_id" placeholder="Unique identifier" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="donor_phone">Donor Phone</label>
+                                        <input type="tel" id="donor_phone" name="donor_phone" placeholder="+237 6XX XXX XXX" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="donor_email">Donor Email</label>
+                                        <input type="email" id="donor_email" name="donor_email" placeholder="donor@example.com" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- QUALITY ASSURANCE -->
+                            <div class="form-section">
+                                <h3 class="section-title">
+                                    <i class="bi bi-shield-check"></i>
+                                    Quality & Testing
+                                </h3>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="hiv_test">HIV Test Result</label>
+                                        <select id="hiv_test" name="hiv_test" required>
+                                            <option value="">Select result...</option>
+                                            <option value="negative">Negative</option>
+                                            <option value="positive">Positive</option>
+                                            <option value="pending">Pending</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="hbv_test">HBV Test Result</label>
+                                        <select id="hbv_test" name="hbv_test" required>
+                                            <option value="">Select result...</option>
+                                            <option value="negative">Negative</option>
+                                            <option value="positive">Positive</option>
+                                            <option value="pending">Pending</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="hcv_test">HCV Test Result</label>
+                                        <select id="hcv_test" name="hcv_test" required>
+                                            <option value="">Select result...</option>
+                                            <option value="negative">Negative</option>
+                                            <option value="positive">Positive</option>
+                                            <option value="pending">Pending</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="test_date">Test Date</label>
+                                        <input type="date" id="test_date" name="test_date" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="storage_temperature">Storage Temperature (°C)</label>
+                                    <div class="input-group">
+                                        <input type="number" id="storage_temperature" name="storage_temperature" placeholder="1-6" min="-10" max="10" step="0.5" required>
+                                        <span class="input-group-suffix">°C</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- NOTES SECTION -->
+                            <div class="form-section">
+                                <h3 class="section-title">
+                                    <i class="bi bi-clipboard-check"></i>
+                                    Additional Notes
+                                </h3>
+                                <div class="form-group">
+                                    <label for="notes">Notes / Special Conditions</label>
+                                    <textarea id="notes" name="notes" rows="4" placeholder="Any special handling instructions or notes..." style="resize: vertical;"></textarea>
+                                    <div class="char-count">0 / 500 characters</div>
+                                </div>
+                            </div>
+
+                            <!-- ACTION BUTTONS -->
+                            <div class="action-buttons">
+                                <a href="stock_detail.html" class="btn btn-secondary">
+                                    <i class="bi bi-arrow-left"></i>
+                                    Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    Update Stock
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Character counter for notes
+        const notesInput = document.getElementById('notes');
+        const charCount = document.querySelector('.char-count');
+
+        if (notesInput) {
+            notesInput.addEventListener('input', function() {
+                charCount.textContent = `${this.value.length} / 500 characters`;
+            });
+        }
+
+        // Form submission handler
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Validate form
+            const bloodType = document.querySelector('input[name="blood_type"]:checked');
+            if (!bloodType) {
+                alert('Please select a blood type');
+                return;
+            }
+
+            const formData = new FormData(this);
+            console.log('Form submitted with data:', Object.fromEntries(formData));
+            
+            // Show success message
+            alert('Stock updated successfully!');
+            setTimeout(() => {
+                window.location.href = 'stock_detail.html';
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

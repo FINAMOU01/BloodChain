@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donor Dashboard — BloodChain</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Donor CSS -->
+    <link rel="stylesheet" href="../../static/css/donor.css">
+</head>
+<body>
+    <div class="d-flex">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <!-- Logo -->
+            <div class="sidebar-logo">
+                <div class="blood-drop-icon"></div>
+                <span>BloodChain</span>
+            </div>
+
+            <!-- Nav Links -->
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-link active">
+                    <i class="bi bi-house-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-heart-pulse"></i>
+                    <span>My Donations</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-hospital"></i>
+                    <span>Nearby Hospitals</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-gift"></i>
+                    <span>Rewards & Points</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-bell-fill"></i>
+                    <span>Notifications</span>
+                    <span class="nav-badge">2</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-gear-fill"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+
+            <!-- Footer -->
+            <div class="sidebar-footer">
+                <p>John Doe</p>
+                <a href="#" class="logout-link">Logout</a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <!-- TOPBAR -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <h1 class="topbar-title">Dashboard</h1>
+                </div>
+                <div class="topbar-right">
+                    <span class="topbar-date">Thursday, May 22 2026</span>
+                    <div class="topbar-notification">
+                        <i class="bi bi-bell-fill"></i>
+                        <span class="notification-badge">2</span>
+                    </div>
+                    <div class="topbar-avatar">JD</div>
+                </div>
+            </header>
+
+            <!-- PAGE BODY -->
+            <div class="page-body">
+                <!-- STATS ROW -->
+                <div class="stats-grid">
+                    <div class="stat-card" style="border-left-color: var(--red);">
+                        <div class="stat-label">Total Donations</div>
+                        <div class="stat-value">12</div>
+                        <div class="stat-small">Lifetime contributions</div>
+                    </div>
+                    <div class="stat-card" style="border-left-color: var(--green);">
+                        <div class="stat-label">Units Donated</div>
+                        <div class="stat-value">4.8L</div>
+                        <div class="stat-small">Total blood volume</div>
+                    </div>
+                    <div class="stat-card" style="border-left-color: var(--orange);">
+                        <div class="stat-label">Next Eligible Date</div>
+                        <div class="stat-value">Jun 18</div>
+                        <div class="stat-small">Ready to donate</div>
+                    </div>
+                    <div class="stat-card" style="border-left-color: var(--red);">
+                        <div class="stat-label">Reward Points</div>
+                        <div class="stat-value">2,450</div>
+                        <div class="stat-small">Available to redeem</div>
+                    </div>
+                </div>
+
+                <!-- RECENT DONATIONS SECTION -->
+                <div class="recent-donations-container">
+                    <div class="panel recent-donations-panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">Recent Donations</h2>
+                            <a href="#" class="panel-link">View history</a>
+                        </div>
+                        <div class="panel-divider"></div>
+
+                        <div class="donations-list">
+                            <div class="donation-item">
+                                <div class="donation-date">
+                                    <div class="donation-day">21</div>
+                                    <div class="donation-month">May</div>
+                                </div>
+                                <div class="donation-info">
+                                    <div class="donation-hospital">Centre Hospitalier de Yaoundé</div>
+                                    <div class="donation-status">Donation completed</div>
+                                </div>
+                                <span class="status-badge success">Success</span>
+                            </div>
+                            <div class="donation-item">
+                                <div class="donation-date">
+                                    <div class="donation-day">08</div>
+                                    <div class="donation-month">Apr</div>
+                                </div>
+                                <div class="donation-info">
+                                    <div class="donation-hospital">Clinique Moderne</div>
+                                    <div class="donation-status">Donation completed</div>
+                                </div>
+                                <span class="status-badge success">Success</span>
+                            </div>
+                            <div class="donation-item">
+                                <div class="donation-date">
+                                    <div class="donation-day">26</div>
+                                    <div class="donation-month">Mar</div>
+                                </div>
+                                <div class="donation-info">
+                                    <div class="donation-hospital">City Hospital</div>
+                                    <div class="donation-status">Donation completed</div>
+                                </div>
+                                <span class="status-badge success">Success</span>
+                            </div>
+                            <div class="donation-item">
+                                <div class="donation-date">
+                                    <div class="donation-day">12</div>
+                                    <div class="donation-month">Feb</div>
+                                </div>
+                                <div class="donation-info">
+                                    <div class="donation-hospital">Medical Center 3</div>
+                                    <div class="donation-status">Donation completed</div>
+                                </div>
+                                <span class="status-badge success">Success</span>
+                            </div>
+                            <div class="donation-item">
+                                <div class="donation-date">
+                                    <div class="donation-day">30</div>
+                                    <div class="donation-month">Jan</div>
+                                </div>
+                                <div class="donation-info">
+                                    <div class="donation-hospital">Emergency Clinic</div>
+                                    <div class="donation-status">Donation completed</div>
+                                </div>
+                                <span class="status-badge success">Success</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

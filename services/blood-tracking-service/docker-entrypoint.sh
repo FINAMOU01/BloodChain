@@ -4,7 +4,7 @@ set -e
 # Database connection parameters
 DB_HOST=${DB_HOST:-localhost}
 DB_PORT=${DB_PORT:-5432}
-DB_MAX_RETRIES=60
+DB_MAX_RETRIES=120
 RETRY_COUNT=0
 
 echo "Starting BloodChain Django service..."
@@ -37,7 +37,7 @@ except Exception as e:
 done
 
 if [ $RETRY_COUNT -eq $DB_MAX_RETRIES ]; then
-    echo "ERROR: Database did not become ready after 60 seconds"
+    echo "ERROR: Database did not become ready after 240 seconds"
     exit 1
 fi
 

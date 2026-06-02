@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Emergency Alert - BloodChain Hospital</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Hospital CSS -->
+    <link rel="stylesheet" href="../../static/css/hospital.css">
+
+    <style>
+        .form-container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .form-header {
+            background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+            border-left: 5px solid var(--red);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .form-header h2 {
+            color: var(--red-dark);
+            margin-bottom: 4px;
+            font-size: 20px;
+        }
+
+        .form-header p {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .form-section {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .form-section-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--red-light);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-section-title i {
+            color: var(--red);
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-label .required {
+            color: var(--red);
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            color: var(--text);
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--red);
+            box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Radio Group */
+        .radio-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .radio-option input[type="radio"] {
+            cursor: pointer;
+        }
+
+        .radio-option label {
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        /* Checkbox Group */
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .checkbox-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-option input[type="checkbox"] {
+            cursor: pointer;
+        }
+
+        .checkbox-option label {
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        /* Blood Type Grid */
+        .blood-type-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .blood-type-option {
+            position: relative;
+        }
+
+        .blood-type-option input[type="radio"] {
+            display: none;
+        }
+
+        .blood-type-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: var(--white);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text);
+            transition: all 0.3s;
+        }
+
+        .blood-type-option input[type="radio"]:checked + .blood-type-label {
+            background: var(--red);
+            color: var(--white);
+            border-color: var(--red);
+        }
+
+        /* Two Column Layout */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+
+        /* Urgency Level Cards */
+        .urgency-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .urgency-card {
+            position: relative;
+        }
+
+        .urgency-card input[type="radio"] {
+            display: none;
+        }
+
+        .urgency-card-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: var(--white);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .urgency-card-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .urgency-card-name {
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text);
+        }
+
+        .urgency-card input[type="radio"]:checked + .urgency-card-label {
+            border-color: var(--red);
+            background: var(--red-light);
+        }
+
+        /* Form Actions */
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--red);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: var(--red-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(185, 28, 28, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--white);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--red);
+            color: var(--red);
+        }
+
+        /* Helper Text */
+        .helper-text {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        /* Success Message */
+        .success-message {
+            display: none;
+            background: #DCFCE7;
+            border: 1px solid #86EFAC;
+            color: #166534;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .blood-type-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .urgency-cards {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .form-section {
+                padding: 16px;
+            }
+
+            .blood-type-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .checkbox-group {
+                grid-template-columns: 1fr;
+            }
+
+            .urgency-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="d-flex">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="blood-drop-icon"></div>
+                <span>BloodChain</span>
+            </div>
+
+            <!-- Nav Links -->
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-link">
+                    <i class="bi bi-house-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="stock_detail.html" class="nav-link">
+                    <i class="bi bi-droplet-fill"></i>
+                    <span>Blood Stock</span>
+                </a>
+                <a href="request_list.html" class="nav-link">
+                    <i class="bi bi-list-check"></i>
+                    <span>Requests</span>
+                </a>
+                <a href="create_emergency_alert.html" class="nav-link active">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <span>Emergency Alert</span>
+                </a>
+                <a href="donors_nearby.html" class="nav-link">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    <span>Nearby Donors</span>
+                </a>
+                <a href="hospital_profile.html" class="nav-link">
+                    <i class="bi bi-building"></i>
+                    <span>Hospital Profile</span>
+                </a>
+            </nav>
+
+            <!-- Footer -->
+            <div class="sidebar-footer">
+                <p>Centre Hospitalier</p>
+                <a href="#" class="logout-link">Logout</a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-content">
+            <!-- TOPBAR -->
+            <div class="topbar">
+                <div class="topbar-left">
+                    <div class="topbar-title">Create Emergency Alert</div>
+                    <div class="topbar-date">May 23, 2026</div>
+                </div>
+                <div class="topbar-right">
+                    <i class="bi bi-exclamation-triangle-fill" style="color: var(--red); font-size: 18px;"></i>
+                </div>
+            </div>
+
+            <!-- PAGE BODY -->
+            <div class="page-body">
+                <div class="form-container">
+                    <!-- Success Message -->
+                    <div id="successMessage" class="success-message">
+                        <i class="bi bi-check-circle-fill"></i>
+                        Emergency alert sent to all eligible donors!
+                    </div>
+
+                    <!-- Form Header -->
+                    <div class="form-header">
+                        <h2><i class="bi bi-exclamation-triangle-fill"></i> Broadcast Emergency Blood Request</h2>
+                        <p>Send an urgent alert to eligible donors in the BloodChain network</p>
+                    </div>
+
+                    <form id="emergencyAlertForm" onsubmit="handleSubmit(event)">
+                        <!-- PATIENT INFORMATION -->
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                <i class="bi bi-person-fill"></i>
+                                Patient Information
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Patient Full Name <span class="required">*</span></label>
+                                    <input type="text" class="form-input" placeholder="Full name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Patient ID <span class="required">*</span></label>
+                                    <input type="text" class="form-input" placeholder="e.g., PAT-2024-001" required>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Age <span class="required">*</span></label>
+                                    <input type="number" class="form-input" placeholder="Years" min="0" max="150" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Gender <span class="required">*</span></label>
+                                    <select class="form-select" required>
+                                        <option value="">Select gender</option>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- BLOOD REQUIREMENTS -->
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                <i class="bi bi-droplet-fill"></i>
+                                Blood Requirements
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Blood Type Required <span class="required">*</span></label>
+                                <div class="blood-type-grid">
+                                    <div class="blood-type-option">
+                                        <input type="radio" id="blood_O_pos" name="blood_type" value="O+" required>
+                                        <label for="blood_O_pos" class="blood-type-label">O+</label>
+                                    </div>
+                                    <div class="blood-type-option">
+                                        <input type="radio" id="blood_O_neg" name="blood_type" value="O-" required>
+                                        <label for="blood_O_neg" class="blood-type-label">O-</label>
+                                    </div>
+                                    <div class="blood-type-option">
+                                        <input type="radio" id="blood_A_pos" name="blood_type" value="A+" required>
+                                        <label for="blood_A_pos" class="blood-type-label">A+</label>
+                                    </div>
+                                    <div class="blood-type-option">
+                                        <input type="radio" id="blood_A_neg" name="blood_type" value="A-" required>
+                                        <label for="blood_A_neg" class="blood-type-label">A-</label>
+                                    </div>
+                                    <div class="blood-type-option">
+                                        <input type="radio" id="blood_B_pos" name="blood_type" value="B+" required>
+                                        <label for="blood_B_pos" class="blood-type-label">B+</label>
+                                    </div>
+                                    <div class="blood-type-option">
+                                        <input type="radio" id="blood_B_neg" name="blood_type" value="B-" required>
+                                        <label for="blood_B_neg" class="blood-type-label">B-</label>
+                                    </div>
+                                    <div class="blood-type-option">
+                                        <input type="radio" id="blood_AB_pos" name="blood_type" value="AB+" required>
+                                        <label for="blood_AB_pos" class="blood-type-label">AB+</label>
+                                    </div>
+                                    <div class="blood-type-option">
+                                        <input type="radio" id="blood_AB_neg" name="blood_type" value="AB-" required>
+                                        <label for="blood_AB_neg" class="blood-type-label">AB-</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Units Required <span class="required">*</span></label>
+                                    <input type="number" class="form-input" placeholder="Number of units" min="1" max="10" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Urgency Level <span class="required">*</span></label>
+                                    <div class="urgency-cards">
+                                        <div class="urgency-card">
+                                            <input type="radio" id="urgency_critical" name="urgency" value="critical" required>
+                                            <label for="urgency_critical" class="urgency-card-label">
+                                                <div class="urgency-card-icon">🔴</div>
+                                                <div class="urgency-card-name">Critical</div>
+                                            </label>
+                                        </div>
+                                        <div class="urgency-card">
+                                            <input type="radio" id="urgency_urgent" name="urgency" value="urgent" required>
+                                            <label for="urgency_urgent" class="urgency-card-label">
+                                                <div class="urgency-card-icon">🟠</div>
+                                                <div class="urgency-card-name">Urgent</div>
+                                            </label>
+                                        </div>
+                                        <div class="urgency-card">
+                                            <input type="radio" id="urgency_standard" name="urgency" value="standard" required>
+                                            <label for="urgency_standard" class="urgency-card-label">
+                                                <div class="urgency-card-icon">🟢</div>
+                                                <div class="urgency-card-name">Standard</div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- MEDICAL INFORMATION -->
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                <i class="bi bi-hospital"></i>
+                                Medical Information
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Department <span class="required">*</span></label>
+                                <select class="form-select" required>
+                                    <option value="">Select department</option>
+                                    <option value="ICU">Intensive Care Unit (ICU)</option>
+                                    <option value="ER">Emergency Room (ER)</option>
+                                    <option value="OR">Operating Room (OR)</option>
+                                    <option value="General Ward">General Ward</option>
+                                    <option value="Pediatrics">Pediatrics</option>
+                                    <option value="Oncology">Oncology</option>
+                                    <option value="Trauma">Trauma Center</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group form-row full">
+                                <label class="form-label">Medical Condition <span class="required">*</span></label>
+                                <textarea class="form-textarea" placeholder="Describe the patient's condition and reason for blood requirement..." required></textarea>
+                                <div class="helper-text">Be specific about the patient's condition to help donors understand the urgency</div>
+                            </div>
+                        </div>
+
+                        <!-- DOCTOR INFORMATION -->
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                <i class="bi bi-person-badge"></i>
+                                Attending Doctor
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Doctor's Full Name <span class="required">*</span></label>
+                                    <input type="text" class="form-input" placeholder="Full name" value="Dr. Antoine Dupuis" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Doctor's Phone <span class="required">*</span></label>
+                                    <input type="tel" class="form-input" placeholder="+237 6XX XXX XXX" value="+237 674 856 923" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Doctor's Email</label>
+                                <input type="email" class="form-input" placeholder="email@example.com">
+                            </div>
+                        </div>
+
+                        <!-- NOTIFICATION SETTINGS -->
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                <i class="bi bi-bell-fill"></i>
+                                Notification Settings
+                            </div>
+
+                            <div class="checkbox-group">
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="notify_nearby" name="notify_nearby" checked>
+                                    <label for="notify_nearby">Notify nearby donors first</label>
+                                </div>
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="notify_matching" name="notify_matching" checked>
+                                    <label for="notify_matching">Notify blood type matches</label>
+                                </div>
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="notify_eligible" name="notify_eligible" checked>
+                                    <label for="notify_eligible">Notify eligible donors</label>
+                                </div>
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="notify_frequent" name="notify_frequent">
+                                    <label for="notify_frequent">Notify frequent donors</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FORM ACTIONS -->
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="window.history.back()">
+                                <i class="bi bi-arrow-left"></i>
+                                Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                Send Emergency Alert
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function handleSubmit(event) {
+            event.preventDefault();
+            
+            // Show success message
+            const successMessage = document.getElementById('successMessage');
+            successMessage.classList.add('show');
+            
+            // Scroll to top to see message
+            window.scrollTo(0, 0);
+            
+            // Reset form
+            document.getElementById('emergencyAlertForm').reset();
+            
+            // Hide message after 3 seconds
+            setTimeout(() => {
+                successMessage.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

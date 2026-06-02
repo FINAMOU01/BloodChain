@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Profile — BloodChain</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Hospital CSS -->
+    <link rel="stylesheet" href="../../static/css/hospital.css">
+</head>
+<body>
+    <div class="d-flex">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <!-- Logo -->
+            <div class="sidebar-logo">
+                <div class="blood-drop-icon"></div>
+                <span>BloodChain</span>
+            </div>
+
+            <!-- Nav Links -->
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-link">
+                    <i class="bi bi-house-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-droplet-fill"></i>
+                    <span>Blood Stock</span>
+                </a>
+                <a href="request_form.html" class="nav-link">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <span>Request Blood</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Donors Nearby</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-bell-fill"></i>
+                    <span>Notifications</span>
+                    <span class="nav-badge">3</span>
+                </a>
+                <a href="hospital_profile.html" class="nav-link active">
+                    <i class="bi bi-gear-fill"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+
+            <!-- Footer -->
+            <div class="sidebar-footer">
+                <p>Centre Hospitalier</p>
+                <a href="#" class="logout-link">Logout</a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <!-- TOPBAR -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <h1 class="topbar-title">Hospital Profile</h1>
+                </div>
+                <div class="topbar-right">
+                    <span class="topbar-date">Thursday, May 22 2026</span>
+                    <div class="topbar-notification">
+                        <i class="bi bi-bell-fill"></i>
+                        <span class="notification-badge">3</span>
+                    </div>
+                    <div class="topbar-avatar">HC</div>
+                </div>
+            </header>
+
+            <!-- PAGE BODY -->
+            <div class="page-body">
+                <!-- PROFILE HEADER -->
+                <div class="profile-header">
+                    <div class="profile-banner">
+                        <div class="profile-banner-content">
+                            <div class="profile-logo">
+                                <i class="bi bi-hospital"></i>
+                            </div>
+                            <div class="profile-info">
+                                <h2 class="profile-name">Centre Hospitalier de Yaoundé</h2>
+                                <p class="profile-location">
+                                    <i class="bi bi-geo-alt-fill"></i>
+                                    Avenue Kennedy, Yaoundé 3500
+                                </p>
+                            </div>
+                        </div>
+                        <button class="btn-edit-profile">
+                            <i class="bi bi-pencil-fill"></i>
+                            Edit Profile
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PROFILE CONTENT -->
+                <div class="profile-container">
+                    <!-- LEFT COLUMN -->
+                    <div class="profile-left">
+                        <!-- BASIC INFORMATION -->
+                        <div class="profile-card">
+                            <div class="profile-card-header">
+                                <h3 class="profile-card-title">
+                                    <i class="bi bi-info-circle-fill"></i>
+                                    Basic Information
+                                </h3>
+                            </div>
+                            <div class="profile-card-body">
+                                <div class="info-row">
+                                    <span class="info-label">Hospital Name</span>
+                                    <span class="info-value">Centre Hospitalier de Yaoundé</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Official Email</span>
+                                    <span class="info-value">contact@chyaounde.cm</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Phone Number</span>
+                                    <span class="info-value">+237 674 856 923</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Website</span>
+                                    <span class="info-value">
+                                        <a href="#" class="info-link">www.chyaounde.cm</a>
+                                    </span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Registration Date</span>
+                                    <span class="info-value">March 10, 2024</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ADDRESS INFORMATION -->
+                        <div class="profile-card">
+                            <div class="profile-card-header">
+                                <h3 class="profile-card-title">
+                                    <i class="bi bi-map-fill"></i>
+                                    Address Information
+                                </h3>
+                            </div>
+                            <div class="profile-card-body">
+                                <div class="info-row">
+                                    <span class="info-label">Street Address</span>
+                                    <span class="info-value">Avenue Kennedy, Plateau Atemengue</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">City</span>
+                                    <span class="info-value">Yaoundé</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Postal Code</span>
+                                    <span class="info-value">3500</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Country</span>
+                                    <span class="info-value">Cameroon</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT COLUMN -->
+                    <div class="profile-right">
+                        <!-- STATISTICS -->
+                        <div class="profile-card">
+                            <div class="profile-card-header">
+                                <h3 class="profile-card-title">
+                                    <i class="bi bi-bar-chart-fill"></i>
+                                    Hospital Statistics
+                                </h3>
+                            </div>
+                            <div class="profile-card-body">
+                                <div class="stat-row">
+                                    <div class="stat-item">
+                                        <div class="stat-icon red">
+                                            <i class="bi bi-droplet-fill"></i>
+                                        </div>
+                                        <div class="stat-content">
+                                            <div class="stat-label">Blood Requests</div>
+                                            <div class="stat-number">187</div>
+                                        </div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-icon green">
+                                            <i class="bi bi-check-circle-fill"></i>
+                                        </div>
+                                        <div class="stat-content">
+                                            <div class="stat-label">Fulfilled</div>
+                                            <div class="stat-number">162</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="stat-row">
+                                    <div class="stat-item">
+                                        <div class="stat-icon orange">
+                                            <i class="bi bi-hourglass-split"></i>
+                                        </div>
+                                        <div class="stat-content">
+                                            <div class="stat-label">Pending</div>
+                                            <div class="stat-number">18</div>
+                                        </div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-icon blue">
+                                            <i class="bi bi-people-fill"></i>
+                                        </div>
+                                        <div class="stat-content">
+                                            <div class="stat-label">Active Donors</div>
+                                            <div class="stat-number">532</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ACCOUNT SETTINGS -->
+                        <div class="profile-card">
+                            <div class="profile-card-header">
+                                <h3 class="profile-card-title">
+                                    <i class="bi bi-shield-lock-fill"></i>
+                                    Account Settings
+                                </h3>
+                            </div>
+                            <div class="profile-card-body">
+                                <div class="settings-option">
+                                    <div class="settings-info">
+                                        <div class="settings-title">Change Password</div>
+                                        <div class="settings-description">Update your account password</div>
+                                    </div>
+                                    <a href="#" class="btn-link">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                </div>
+                                <div class="settings-divider"></div>
+                                <div class="settings-option">
+                                    <div class="settings-info">
+                                        <div class="settings-title">Two-Factor Authentication</div>
+                                        <div class="settings-description">Secure your account with 2FA</div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="settings-divider"></div>
+                                <div class="settings-option">
+                                    <div class="settings-info">
+                                        <div class="settings-title">Email Notifications</div>
+                                        <div class="settings-description">Receive updates about requests</div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- DANGER ZONE -->
+                        <div class="profile-card danger">
+                            <div class="profile-card-header">
+                                <h3 class="profile-card-title danger-title">
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                    Danger Zone
+                                </h3>
+                            </div>
+                            <div class="profile-card-body">
+                                <button class="btn-danger-zone">
+                                    <i class="bi bi-trash-fill"></i>
+                                    Delete Account
+                                </button>
+                                <p class="danger-notice">Permanently delete your hospital account and all associated data. This action cannot be undone.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ACTION BUTTONS -->
+                <div class="profile-actions">
+                    <a href="dashboard.html" class="btn-secondary">
+                        <i class="bi bi-arrow-left"></i>
+                        Back to Dashboard
+                    </a>
+                    <button class="btn-submit">
+                        <i class="bi bi-check-circle"></i>
+                        Save Changes
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Toggle switch functionality
+        document.querySelectorAll('.toggle-switch input').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                console.log('Setting changed:', this.checked);
+            });
+        });
+
+        // Edit profile button
+        document.querySelector('.btn-edit-profile').addEventListener('click', function() {
+            alert('Edit profile functionality - redirect to edit form');
+        });
+
+        // Delete account warning
+        document.querySelector('.btn-danger-zone').addEventListener('click', function() {
+            if (confirm('Are you sure you want to delete your hospital account? This action cannot be undone.')) {
+                alert('Account deletion initiated');
+            }
+        });
+    </script>
+</body>
+</html>

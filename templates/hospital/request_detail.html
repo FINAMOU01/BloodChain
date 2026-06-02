@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Details — BloodChain</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Hospital CSS -->
+    <link rel="stylesheet" href="../../static/css/hospital.css">
+
+    <style>
+        /* Request Detail Specific Styles */
+        .detail-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 24px;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, var(--red) 0%, #a01818 100%);
+            color: var(--white);
+            padding: 28px;
+            border-radius: 12px;
+        }
+
+        .detail-header-left h2 {
+            margin: 0 0 8px 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .detail-header-left p {
+            margin: 0;
+            opacity: 0.95;
+            font-size: 14px;
+        }
+
+        .detail-header-right {
+            display: flex;
+            gap: 12px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .detail-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .detail-card-header {
+            background: var(--red-light);
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .detail-card-header h3 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-card-header i {
+            color: var(--red);
+            font-size: 16px;
+        }
+
+        .detail-card-body {
+            padding: 20px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .detail-value.large {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--red);
+        }
+
+        .detail-value.highlight {
+            background: var(--red-light);
+            color: var(--red);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+            display: inline-block;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-badge.critical {
+            background: var(--red-light);
+            color: var(--red);
+        }
+
+        .status-badge.urgent {
+            background: var(--orange-light);
+            color: var(--orange);
+        }
+
+        .status-badge.standard {
+            background: var(--green-light);
+            color: var(--green);
+        }
+
+        .status-badge.approved {
+            background: var(--green-light);
+            color: var(--green);
+        }
+
+        .status-badge.pending {
+            background: var(--orange-light);
+            color: var(--orange);
+        }
+
+        .status-badge.fulfilled {
+            background: #e0e7ff;
+            color: #4f46e5;
+        }
+
+        .blood-type-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background: var(--red-light);
+            color: var(--red);
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .timeline {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .timeline-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .timeline-marker {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .timeline-dot {
+            width: 12px;
+            height: 12px;
+            background: var(--red);
+            border-radius: 50%;
+            border: 3px solid var(--red-light);
+        }
+
+        .timeline-line {
+            width: 2px;
+            flex: 1;
+            background: var(--border);
+        }
+
+        .timeline-content {
+            flex: 1;
+            padding-top: 2px;
+        }
+
+        .timeline-time {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .timeline-text {
+            font-size: 14px;
+            color: var(--text);
+            margin-top: 4px;
+        }
+
+        .notes-section {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .notes-section h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+            margin: 0 0 16px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .notes-section p {
+            margin: 0;
+            color: var(--text);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-bottom: 24px;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--red);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: #a01818;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(185, 28, 28, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--border);
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            background: #d4c4b4;
+        }
+
+        .btn-success {
+            background: var(--green);
+            color: var(--white);
+        }
+
+        .btn-success:hover {
+            background: #15803d;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #fca5a5;
+            color: var(--red);
+        }
+
+        .btn-danger:hover {
+            background: #f87171;
+        }
+
+        @media (max-width: 1024px) {
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .detail-header {
+                flex-direction: column;
+            }
+
+            .detail-header-right {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .detail-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .action-bar {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="d-flex">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <!-- Logo -->
+            <div class="sidebar-logo">
+                <div class="blood-drop-icon"></div>
+                <span>BloodChain</span>
+            </div>
+
+            <!-- Nav Links -->
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-link">
+                    <i class="bi bi-house-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="stock_detail.html" class="nav-link">
+                    <i class="bi bi-capsule"></i>
+                    <span>Blood Stock</span>
+                </a>
+                <a href="request_list.html" class="nav-link active">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <span>Request Blood</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Donors Nearby</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-bell-fill"></i>
+                    <span>Notifications</span>
+                    <span class="nav-badge">3</span>
+                </a>
+                <a href="hospital_profile.html" class="nav-link">
+                    <i class="bi bi-gear-fill"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+
+            <!-- Footer -->
+            <div class="sidebar-footer">
+                <p>Centre Hospitalier</p>
+                <a href="#" class="logout-link">Logout</a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <!-- TOPBAR -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <h1 class="topbar-title">Request Details</h1>
+                </div>
+                <div class="topbar-right">
+                    <span class="topbar-date">Thursday, May 22 2026</span>
+                    <div class="topbar-notification">
+                        <i class="bi bi-bell-fill"></i>
+                        <span class="notification-badge">3</span>
+                    </div>
+                    <div class="topbar-avatar">HC</div>
+                </div>
+            </header>
+
+            <!-- PAGE BODY -->
+            <div class="page-body">
+                <div class="detail-container">
+                    <!-- HEADER -->
+                    <div class="detail-header">
+                        <div class="detail-header-left">
+                            <h2>REQ-001</h2>
+                            <p>Blood Request for Critical Emergency</p>
+                        </div>
+                        <div class="detail-header-right">
+                            <span class="status-badge critical">
+                                <i class="bi bi-exclamation-circle-fill"></i>
+                                Critical
+                            </span>
+                            <span class="status-badge pending">
+                                <i class="bi bi-clock-fill"></i>
+                                Pending
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- ACTION BAR -->
+                    <div class="action-bar">
+                        <a href="request_list.html" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i>
+                            Back to List
+                        </a>
+                        <button class="btn btn-success">
+                            <i class="bi bi-check-circle-fill"></i>
+                            Approve Request
+                        </button>
+                        <button class="btn btn-danger">
+                            <i class="bi bi-x-circle-fill"></i>
+                            Reject Request
+                        </button>
+                    </div>
+
+                    <!-- MAIN GRID -->
+                    <div class="detail-grid">
+                        <!-- PATIENT INFORMATION -->
+                        <div class="detail-card">
+                            <div class="detail-card-header">
+                                <i class="bi bi-person-fill"></i>
+                                <h3>Patient Information</h3>
+                            </div>
+                            <div class="detail-card-body">
+                                <div class="detail-row">
+                                    <div>
+                                        <div class="detail-label">Patient Name</div>
+                                        <div class="detail-value">Jean Pierre Moukongo</div>
+                                    </div>
+                                </div>
+                                <div class="detail-row">
+                                    <div>
+                                        <div class="detail-label">Patient ID</div>
+                                        <div class="detail-value">PAT-2026-4521</div>
+                                    </div>
+                                </div>
+                                <div class="detail-row">
+                                    <div>
+                                        <div class="detail-label">Age</div>
+                                        <div class="detail-value">45 years old</div>
+                                    </div>
+                                </div>
+                                <div class="detail-row">
+                                    <div>
+                                        <div class="detail-label">Medical Condition</div>
+                                        <div class="detail-value">Severe trauma, post-surgery bleeding</div>
+                                    </div>
+                                </div>
+                                <div class="detail-row">
+                                    <div>
+                                        <div class="detail-label">Department</div>
+                                        <div class="detail-value">Emergency Surgery</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- BLOOD REQUEST DETAILS -->
+                        <div class="detail-card">
+                            <div class="detail-card-header">
+                                <i class="bi bi-droplet-fill"></i>
+                                <h3>Blood Request Details</h3>
+                            </div>
+                            <div class="detail-card-body">
+                                <div class="detail-row">
+                                    <div>
+                                        <div class="detail-label">Blood Type Required</div>
+                                        <div class="detail-value"><span class="blood-type-badge">O-</span></div>
+                                    </div>
+                                </div>
+                                <div class="detail-row">
+                                    <div>
+                                        <div class="detail-label">Units Required</div>
+                                        <div class="detail-value large">4</div>
+                                    </div>
+                                </div>
+                                <div class="detail-row">
+                                    <div>
+                                        <div class="detail-label">Urgency Level</div>
+                                        <div class="detail-value"><span class="status-badge critical">Critical</span></div>
+                                    </div>
+                                </div>
+                                <div class="detail-row">
+                                    <div>
+                                        <div class="detail-label">Requested On</div>
+                                        <div class="detail-value">May 22, 2026 at 14:30 UTC</div>
+                                    </div>
+                                </div>
+                                <div class="detail-row">
+                                    <div>
+                                        <div class="detail-label">Required By</div>
+                                        <div class="detail-value">May 22, 2026 at 15:30 UTC</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- HOSPITAL CONTACT -->
+                        <div class="detail-card">
+                            <div class="detail-card-header">
+                                <i class="bi bi-hospital"></i>
+                                <h3>Hospital Contact</h3>
+                            </div>
+                            <div class="detail-card-body">
+                                <div class="detail-row">
+                                    <div>
+                                        <div class="detail-label">Hospital Name</div>
+                                        <div class="detail-value">Centre Hospitalier de Yaoundé</div>
+                                    </div>
+                                </div>
+                                <div class="detail-row">
+                                    <div>
+                                        <div class="detail-label">Contact Person</div>
+                                        <div class="detail-value">Dr. Antoine Dupuis</div>
+                                    </div>
+                                </div>
+                                <div class="detail-row">
+                                    <div>
+                                        <div class="detail-label">Phone Number</div>
+                                        <div class="detail-value">+237 674 856 923</div>
+                                    </div>
+                                </div>
+                                <div class="detail-row">
+                                    <div>
+                                        <div class="detail-label">Email</div>
+                                        <div class="detail-value">contact@chyaounde.cm</div>
+                                    </div>
+                                </div>
+                                <div class="detail-row">
+                                    <div>
+                                        <div class="detail-label">Location</div>
+                                        <div class="detail-value">Avenue Kennedy, Yaoundé 3500</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- REQUEST STATUS TRACKING -->
+                        <div class="detail-card">
+                            <div class="detail-card-header">
+                                <i class="bi bi-diagram-3"></i>
+                                <h3>Request Status</h3>
+                            </div>
+                            <div class="detail-card-body">
+                                <div class="detail-row">
+                                    <div>
+                                        <div class="detail-label">Current Status</div>
+                                        <div class="detail-value"><span class="status-badge pending">Pending Review</span></div>
+                                    </div>
+                                </div>
+                                <div class="detail-row">
+                                    <div>
+                                        <div class="detail-label">Submitted By</div>
+                                        <div class="detail-value">Dr. Isabelle Boucher</div>
+                                    </div>
+                                </div>
+                                <div class="detail-row">
+                                    <div>
+                                        <div class="detail-label">Submitted At</div>
+                                        <div class="detail-value">May 22, 2026 14:30</div>
+                                    </div>
+                                </div>
+                                <div class="detail-row">
+                                    <div>
+                                        <div class="detail-label">Processing Time</div>
+                                        <div class="detail-value">1h 15m</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TIMELINE -->
+                    <div class="timeline">
+                        <h3 class="timeline-title">
+                            <i class="bi bi-clock-history"></i>
+                            Request Timeline
+                        </h3>
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-line"></div>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="timeline-time">May 22, 2026 - 14:30 UTC</div>
+                                <div class="timeline-text">Request submitted by Centre Hospitalier de Yaoundé for critical patient Jean Pierre Moukongo</div>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-line"></div>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="timeline-time">May 22, 2026 - 14:45 UTC</div>
+                                <div class="timeline-text">Request received and logged in BloodChain system. Blood type O- availability verified.</div>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                <div class="timeline-dot"></div>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="timeline-time">May 22, 2026 - 15:45 UTC</div>
+                                <div class="timeline-text">Awaiting approval or rejection from hospital administrator</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NOTES SECTION -->
+                    <div class="notes-section">
+                        <h3>
+                            <i class="bi bi-sticky-fill"></i>
+                            Special Instructions & Notes
+                        </h3>
+                        <p>Patient requires immediate transfusion. Emergency surgery in progress. Activate blood bank priority protocol. Ensure rapid cross-matching before delivery. Transport via medical courier with temperature monitoring. Contact Dr. Antoine Dupuis immediately upon fulfillment.</p>
+                    </div>
+
+                    <!-- SECONDARY ACTION BAR -->
+                    <div class="action-bar">
+                        <a href="request_list.html" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i>
+                            Back to List
+                        </a>
+                        <button class="btn btn-primary">
+                            <i class="bi bi-pencil-fill"></i>
+                            Edit Request
+                        </button>
+                        <button class="btn btn-success">
+                            <i class="bi bi-check-circle-fill"></i>
+                            Approve Request
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Approve button handler
+        document.querySelectorAll('.btn-success').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (confirm('Are you sure you want to approve this blood request?')) {
+                    alert('Request approved successfully!');
+                    setTimeout(() => {
+                        window.location.href = 'request_list.html';
+                    }, 1000);
+                }
+            });
+        });
+
+        // Reject button handler
+        document.querySelector('.btn-danger')?.addEventListener('click', function() {
+            const reason = prompt('Please provide a reason for rejection:');
+            if (reason) {
+                alert('Request rejected: ' + reason);
+                setTimeout(() => {
+                    window.location.href = 'request_list.html';
+                }, 1000);
+            }
+        });
+
+        // Edit button handler
+        const editBtn = document.querySelectorAll('.btn-primary')[1];
+        if (editBtn) {
+            editBtn.addEventListener('click', function() {
+                alert('Edit functionality would redirect to request form with this request data pre-filled');
+            });
+        }
+    </script>
+</body>
+</html>

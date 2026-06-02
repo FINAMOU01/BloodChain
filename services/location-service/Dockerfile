@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-RUN pip install --user --no-cache-dir --default-timeout=100 --retries=5 -r requirements.txt
+RUN pip install --user --no-cache-dir --default-timeout=300 --retries=5 -r requirements.txt
 
 # ── Runtime stage ──
 FROM python:3.11-slim
@@ -34,9 +34,12 @@ WORKDIR /app
 COPY --from=builder /root/.local /root/.local
 
 # Make gunicorn and other executables readable/executable by non-root user
-RUN chmod -R a+rx /root/.local/bin
+RUN chmod -R a+rx /root/.local/bin && \
+    chmod -R a+r /root/.local/lib && \
+    find /root/.local/lib -type d -exec chmod a+rx {} \;
 
 ENV PATH=/root/.local/bin:$PATH \
+    PYTHONPATH=/root/.local/lib/python3.11/site-packages \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 

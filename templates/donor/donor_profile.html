@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile — BloodChain</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Donor CSS -->
+    <link rel="stylesheet" href="../../static/css/donor.css">
+
+    <style>
+        /* Donor Profile Specific Styles */
+        .profile-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .profile-banner {
+            background: linear-gradient(135deg, var(--red) 0%, #a01818 100%);
+            padding: 32px;
+            border-radius: 12px;
+            color: var(--white);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+        }
+
+        .profile-banner-left {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: 600;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .profile-banner-info h2 {
+            margin: 0 0 4px 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .profile-banner-info p {
+            margin: 0 0 8px 0;
+            font-size: 13px;
+            opacity: 0.95;
+        }
+
+        .profile-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .edit-profile-btn {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: var(--white);
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .edit-profile-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .profile-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .profile-card-header {
+            background: var(--red-light);
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .profile-card-header h3 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .profile-card-header i {
+            color: var(--red);
+            font-size: 16px;
+        }
+
+        .profile-card-body {
+            padding: 20px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .info-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .blood-type-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background: var(--red-light);
+            color: var(--red);
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border-left: 4px solid var(--red);
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--red);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toggle-switch input {
+            display: none;
+        }
+
+        .toggle-slider {
+            width: 44px;
+            height: 24px;
+            background: var(--border);
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-slider::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: var(--white);
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background: var(--red);
+        }
+
+        .toggle-switch input:checked + .toggle-slider::after {
+            left: 22px;
+        }
+
+        .settings-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .settings-option:last-child {
+            border-bottom: none;
+        }
+
+        .settings-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .settings-description {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .danger-zone {
+            background: var(--red-light);
+            border: 1px solid var(--red);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .danger-zone h3 {
+            margin: 0 0 12px 0;
+            color: var(--red);
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .danger-zone p {
+            margin: 0 0 16px 0;
+            color: var(--text);
+            font-size: 13px;
+        }
+
+        .btn-delete {
+            padding: 10px 20px;
+            background: var(--white);
+            border: 2px solid var(--red);
+            color: var(--red);
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 13px;
+        }
+
+        .btn-delete:hover {
+            background: var(--red);
+            color: var(--white);
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--red);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: #a01818;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(185, 28, 28, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--border);
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            background: #d4c4b4;
+        }
+
+        @media (max-width: 1024px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-banner {
+                flex-direction: column;
+                gap: 16px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .profile-banner {
+                padding: 20px;
+            }
+
+            .profile-avatar {
+                width: 60px;
+                height: 60px;
+                font-size: 28px;
+            }
+
+            .profile-banner-info h2 {
+                font-size: 18px;
+            }
+
+            .info-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .action-bar {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .profile-banner {
+                padding: 16px;
+            }
+
+            .profile-card-body {
+                padding: 16px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="d-flex">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <!-- Logo -->
+            <div class="sidebar-logo">
+                <div class="blood-drop-icon"></div>
+                <span>BloodChain</span>
+            </div>
+
+            <!-- Nav Links -->
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-link">
+                    <i class="bi bi-house-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="donor_history.html" class="nav-link">
+                    <i class="bi bi-heart-pulse"></i>
+                    <span>My Donations</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-hospital"></i>
+                    <span>Nearby Hospitals</span>
+                </a>
+                <a href="donor_appointments.html" class="nav-link">
+                    <i class="bi bi-calendar-check"></i>
+                    <span>Appointments</span>
+                </a>
+                <a href="donor_eligibility.html" class="nav-link">
+                    <i class="bi bi-shield-check"></i>
+                    <span>My Eligibility</span>
+                </a>
+                <a href="donor_rewards.html" class="nav-link">
+                    <i class="bi bi-gift"></i>
+                    <span>Rewards & Points</span>
+                </a>
+                <a href="emergency_alerts.html" class="nav-link">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <span>Emergency Alerts</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-bell-fill"></i>
+                    <span>Notifications</span>
+                    <span class="nav-badge">2</span>
+                </a>
+                <a href="donor_profile.html" class="nav-link active">
+                    <i class="bi bi-gear-fill"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+
+            <!-- Footer -->
+            <div class="sidebar-footer">
+                <p>John Doe</p>
+                <a href="#" class="logout-link">Logout</a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <!-- TOPBAR -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <h1 class="topbar-title">My Profile</h1>
+                </div>
+                <div class="topbar-right">
+                    <span class="topbar-date">Thursday, May 22 2026</span>
+                    <div class="topbar-notification">
+                        <i class="bi bi-bell-fill"></i>
+                        <span class="notification-badge">2</span>
+                    </div>
+                    <div class="topbar-avatar">JD</div>
+                </div>
+            </header>
+
+            <!-- PAGE BODY -->
+            <div class="page-body">
+                <div class="profile-container">
+                    <!-- PROFILE BANNER -->
+                    <div class="profile-banner">
+                        <div class="profile-banner-left">
+                            <div class="profile-avatar">JD</div>
+                            <div class="profile-banner-info">
+                                <h2>John Doe</h2>
+                                <p>Active Donor • Member since January 2024</p>
+                                <span class="profile-badge">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    Verified & Eligible
+                                </span>
+                            </div>
+                        </div>
+                        <button class="edit-profile-btn">
+                            <i class="bi bi-pencil-fill"></i>
+                            Edit Profile
+                        </button>
+                    </div>
+
+                    <!-- STATISTICS -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number">12</div>
+                            <div class="stat-label">Total Donations</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">4.8L</div>
+                            <div class="stat-label">Total Volume</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">2,450</div>
+                            <div class="stat-label">Reward Points</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">Jun 18</div>
+                            <div class="stat-label">Next Eligible</div>
+                        </div>
+                    </div>
+
+                    <!-- PROFILE GRID -->
+                    <div class="profile-grid">
+                        <!-- BASIC INFORMATION -->
+                        <div class="profile-card">
+                            <div class="profile-card-header">
+                                <i class="bi bi-person-fill"></i>
+                                <h3>Basic Information</h3>
+                            </div>
+                            <div class="profile-card-body">
+                                <div class="info-row">
+                                    <span class="info-label">Full Name</span>
+                                    <span class="info-value">John Doe</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Email Address</span>
+                                    <span class="info-value">john.doe@email.com</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Phone Number</span>
+                                    <span class="info-value">+237 678 456 789</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Blood Type</span>
+                                    <div><span class="blood-type-badge">O+</span></div>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Date of Birth</span>
+                                    <span class="info-value">March 15, 1985</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Member Since</span>
+                                    <span class="info-value">January 10, 2024</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ADDRESS INFORMATION -->
+                        <div class="profile-card">
+                            <div class="profile-card-header">
+                                <i class="bi bi-map-fill"></i>
+                                <h3>Address Information</h3>
+                            </div>
+                            <div class="profile-card-body">
+                                <div class="info-row">
+                                    <span class="info-label">Street Address</span>
+                                    <span class="info-value">Rue de la Paix, Quartier Bastos</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">City</span>
+                                    <span class="info-value">Yaoundé</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Postal Code</span>
+                                    <span class="info-value">3500</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Country</span>
+                                    <span class="info-value">Cameroon</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DONATION PREFERENCES -->
+                    <div class="profile-card" style="margin-bottom: 24px;">
+                        <div class="profile-card-header">
+                            <i class="bi bi-heart-fill"></i>
+                            <h3>Donation Preferences</h3>
+                        </div>
+                        <div class="profile-card-body">
+                            <div class="settings-option">
+                                <div>
+                                    <div class="settings-label">Email Notifications</div>
+                                    <div class="settings-description">Receive updates about blood needs & events</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="settings-option">
+                                <div>
+                                    <div class="settings-label">SMS Notifications</div>
+                                    <div class="settings-description">Receive critical blood request alerts</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="settings-option">
+                                <div>
+                                    <div class="settings-label">Public Profile</div>
+                                    <div class="settings-description">Allow hospitals to find you as donor</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ACCOUNT SETTINGS -->
+                    <div class="profile-card" style="margin-bottom: 24px;">
+                        <div class="profile-card-header">
+                            <i class="bi bi-shield-check"></i>
+                            <h3>Account Settings</h3>
+                        </div>
+                        <div class="profile-card-body">
+                            <div class="settings-option">
+                                <div>
+                                    <div class="settings-label">Change Password</div>
+                                    <div class="settings-description">Update your login password</div>
+                                </div>
+                                <button style="padding: 8px 16px; background: var(--border); border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; color: var(--text); transition: all 0.3s;">
+                                    Update
+                                </button>
+                            </div>
+                            <div class="settings-option">
+                                <div>
+                                    <div class="settings-label">Two-Factor Authentication</div>
+                                    <div class="settings-description">Add extra security to your account</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DANGER ZONE -->
+                    <div class="danger-zone">
+                        <h3>Danger Zone</h3>
+                        <p>Permanently delete your account and all associated data. This action cannot be undone.</p>
+                        <button class="btn-delete">Delete Account</button>
+                    </div>
+
+                    <!-- ACTION BAR -->
+                    <div class="action-bar">
+                        <a href="dashboard.html" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i>
+                            Back to Dashboard
+                        </a>
+                        <button class="btn btn-primary">
+                            <i class="bi bi-check-circle-fill"></i>
+                            Save Changes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Toggle switch listeners
+        document.querySelectorAll('.toggle-switch input').forEach(toggle => {
+            toggle.addEventListener('change', function() {
+                console.log('Setting updated:', this.checked);
+            });
+        });
+
+        // Edit profile button
+        document.querySelector('.edit-profile-btn').addEventListener('click', function() {
+            alert('Redirect to edit profile form');
+        });
+
+        // Delete account button
+        document.querySelector('.btn-delete').addEventListener('click', function() {
+            if (confirm('Are you absolutely sure? This action cannot be undone.')) {
+                alert('Account deletion initiated...');
+            }
+        });
+
+        // Save changes button
+        document.querySelector('.btn-primary').addEventListener('click', function() {
+            alert('Profile changes saved successfully!');
+        });
+    </script>
+</body>
+</html>

@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-RUN pip install --user --no-cache-dir --default-timeout=100 --retries=5 -r requirements.txt
+RUN pip install --user --no-cache-dir --default-timeout=300 --retries=5 -r requirements.txt
 
 # ── Runtime stage ──
 FROM python:3.11-slim
@@ -27,6 +27,7 @@ WORKDIR /app
 COPY --from=builder /root/.local /root/.local
 
 ENV PATH=/root/.local/bin:$PATH \
+    PYTHONPATH=/app:/root/.local/lib/python3.11/site-packages \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 
@@ -42,4 +43,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 
 EXPOSE 8000
 
-CMD ["python", "-m", "blockchain_service"]
+CMD ["python", "blockchain_service.py"]

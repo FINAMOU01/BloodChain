@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blood Map — BloodChain</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- Leaflet CSS CDN (MUST be before map.css) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    
+    <style>
+        :root {
+            --red: #B91C1C;
+            --red-dark: #7F1D1D;
+            --red-light: #FEE2E2;
+            --cream: #FDF6EC;
+            --text: #2C1810;
+            --muted: #7C5C50;
+            --border: #E8D5C4;
+            --white: #FFFFFF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--cream);
+            color: var(--text);
+        }
+
+        /* ─────────────────────────── NAVBAR ─────────────────────────── */
+        .navbar-blood {
+            background-color: var(--white);
+            padding: 16px 32px;
+            box-shadow: 0 2px 8px rgba(44, 24, 16, 0.08);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--red);
+            transition: opacity 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            opacity: 0.8;
+        }
+
+        .navbar-blood .bi-droplet-fill {
+            color: var(--red);
+            font-size: 24px;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 32px;
+            margin-left: auto;
+        }
+
+        .nav-link {
+            color: var(--muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: var(--red);
+        }
+
+        .nav-link.active {
+            color: var(--red);
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--red);
+        }
+
+        /* ─────────────────────────── FILTER BAR ─────────────────────────── */
+        .filter-bar {
+            background-color: var(--white);
+            padding: 20px 32px;
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 1px 4px rgba(44, 24, 16, 0.05);
+        }
+
+        .filter-bar-content {
+            display: flex;
+            gap: 20px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .filter-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-select {
+            padding: 10px 12px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            color: var(--text);
+            background-color: var(--white);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 140px;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--red);
+            box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.1);
+        }
+
+        .filter-bar-buttons {
+            display: flex;
+            gap: 12px;
+            margin-left: auto;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background-color: var(--red);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--red-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(185, 28, 28, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--muted);
+            border: 2px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--red);
+            color: var(--red);
+        }
+
+        /* ─────────────────────────── MAP CONTAINER ─────────────────────────── */
+        .blood-map-container {
+            width: 100%;
+            height: 600px;
+            z-index: 1;
+            border-top: 3px solid var(--red);
+            border-bottom: 1px solid var(--border);
+            animation: slideUp 0.6s ease-out 0.1s both;
+        }
+
+        /* ─────────────────────────── SUMMARY CARDS ─────────────────────────── */
+        .summary-section {
+            padding: 40px 32px;
+            background-color: var(--cream);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .summary-card {
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 32px 24px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(44, 24, 16, 0.05);
+            border-top: 4px solid var(--red);
+            animation: slideUp 0.6s ease-out forwards;
+            transition: transform 0.3s ease;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .summary-card:nth-child(1) {
+            animation-delay: 0.15s;
+        }
+
+        .summary-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .summary-card:nth-child(3) {
+            animation-delay: 0.25s;
+        }
+
+        .summary-card-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 48px;
+            font-weight: 900;
+            color: var(--red);
+            line-height: 1;
+            margin-bottom: 12px;
+        }
+
+        .summary-card-label {
+            font-size: 14px;
+            color: var(--muted);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        /* ─────────────────────────── FOOTER ─────────────────────────── */
+        .footer-section {
+            background-color: var(--text);
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+            padding: 24px 32px;
+            font-size: 13px;
+            margin-top: 40px;
+        }
+
+        .footer-section a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section a:hover {
+            color: var(--red);
+        }
+
+        /* ─────────────────────────── ANIMATIONS ─────────────────────────── */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ─────────────────────────── RESPONSIVE ─────────────────────────── */
+        @media (max-width: 768px) {
+            .navbar-blood {
+                padding: 12px 16px;
+            }
+
+            .nav-menu {
+                gap: 16px;
+                font-size: 12px;
+            }
+
+            .filter-bar {
+                padding: 16px;
+            }
+
+            .filter-bar-content {
+                gap: 12px;
+            }
+
+            .form-select {
+                min-width: 110px;
+                font-size: 12px;
+            }
+
+            .filter-bar-buttons {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .blood-map-container {
+                height: 400px;
+            }
+
+            .summary-section {
+                padding: 24px 16px;
+            }
+
+            .summary-grid {
+                gap: 16px;
+            }
+
+            .summary-card {
+                padding: 20px 16px;
+            }
+
+            .summary-card-value {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar-blood">
+        <a href="../../index.html" class="navbar-brand">
+            <i class="bi bi-droplet-fill"></i>
+            <span>BloodChain</span>
+        </a>
+        <div class="nav-menu">
+            <a href="../../index.html" class="nav-link">Home</a>
+            <a href="#" class="nav-link">Dashboard</a>
+            <a href="#" class="nav-link active">Map</a>
+            <a href="#" class="nav-link">Alerts</a>
+        </div>
+    </nav>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <div class="filter-bar-content">
+            <div class="filter-group">
+                <label class="filter-label">Blood Type</label>
+                <select name="blood_type" class="form-select">
+                    <option value="">All Types</option>
+                    <option>A+</option>
+                    <option>A-</option>
+                    <option>B+</option>
+                    <option>B-</option>
+                    <option>AB+</option>
+                    <option>AB-</option>
+                    <option>O+</option>
+                    <option>O-</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Radius</label>
+                <select name="radius" class="form-select">
+                    <option>5 km</option>
+                    <option>10 km</option>
+                    <option selected>25 km</option>
+                    <option>50 km</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">All</option>
+                    <option>Available</option>
+                    <option>Low</option>
+                    <option>Critical</option>
+                </select>
+            </div>
+            <div class="filter-bar-buttons">
+                <button class="btn btn-primary">
+                    <i class="bi bi-search"></i>
+                    Search
+                </button>
+                <button class="btn btn-secondary">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                    Reset
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Map Container -->
+    <div id="blood-map" class="blood-map-container"></div>
+
+    <!-- Summary Cards -->
+    <div class="summary-section">
+        <div class="summary-grid">
+            <div class="summary-card">
+                <div class="summary-card-value">5</div>
+                <div class="summary-card-label">
+                    <i class="bi bi-hospital-fill"></i>
+                    Hospitals Shown
+                </div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-card-value">45</div>
+                <div class="summary-card-label">
+                    <i class="bi bi-droplet-fill"></i>
+                    Total Units Available
+                </div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-card-value" style="color: #DC2626;">1</div>
+                <div class="summary-card-label">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    Critical Alerts
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-section">
+        <p>© 2025 BloodChain. Saving lives through technology.</p>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="../../static/js/map.js"></script>
+</body>
+</html>
