@@ -14,7 +14,9 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-RUN pip install --user --no-cache-dir --default-timeout=100 --retries=5 -r requirements.txt
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+RUN pip install --no-cache-dir --default-timeout=100 --retries=5 -r requirements.txt
 
 # ── Runtime stage ──
 FROM python:3.11-slim
@@ -31,12 +33,12 @@ RUN groupadd -r bloodchain && useradd -r -g bloodchain bloodchain
 WORKDIR /app
 
 # Copy Python dependencies from builder
-COPY --from=builder /root/.local /root/.local
+COPY --chown=bloodchain:bloodchain --from=builder /opt/venv /opt/venv
 
 # Make gunicorn and other executables readable/executable by non-root user
-RUN chmod -R a+rx /root/.local/bin
 
-ENV PATH=/root/.local/bin:$PATH \
+
+ENV PATH="/opt/venv/bin:$PATH" \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 
@@ -52,4 +54,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 
 EXPOSE 8000
 
-ENTRYPOINT ["gunicorn", "location.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "4"]
+ENTRYPOINT ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "4"]

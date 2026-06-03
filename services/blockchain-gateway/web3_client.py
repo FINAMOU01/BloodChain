@@ -1,5 +1,5 @@
 from web3 import Web3
-from .config import LOCAL_RPC_URL, SEPOLIA_RPC_URL
+from config import LOCAL_RPC_URL, SEPOLIA_RPC_URL
 
 def get_web3():
     if SEPOLIA_RPC_URL:

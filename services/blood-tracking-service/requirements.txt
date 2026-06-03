@@ -10,6 +10,7 @@ gunicorn==21.2.0
 
 # Caching and message broker - Redis client
 redis==5.0.1
+django-redis==5.4.0
 
 # JWT authentication for token-based auth
 PyJWT==2.12.1
@@ -17,6 +18,11 @@ PyJWT==2.12.1
 # CORS headers for cross-origin requests
 django-cors-headers==4.3.1
 
+# Configuration management
+python-decouple==3.8
+
 # Ethereum blockchain interaction
 web3==6.10.0
-django-prometheus
+django-prometheus==2.5.0
+
+drf_yasg==1.21.7

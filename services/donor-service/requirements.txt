@@ -1,2 +1,27 @@
-gunicorn==26.0.0
-packaging==26.2
+# Core Django framework and REST API
+Django==4.2.0
+djangorestframework==3.14.0
+
+# Database - PostgreSQL adapter
+psycopg2-binary==2.9.9
+
+# WSGI server for production deployment
+gunicorn==21.2.0
+
+# Caching and message broker - Redis client
+redis==5.0.1
+django-redis==5.4.0
+
+# JWT authentication for token-based auth
+PyJWT==2.12.1
+
+# CORS headers for cross-origin requests
+django-cors-headers==4.3.1
+
+# Configuration management
+python-decouple==3.8
+
+# Prometheus metrics
+django-prometheus==2.5.0
+
+drf_yasg==1.21.7

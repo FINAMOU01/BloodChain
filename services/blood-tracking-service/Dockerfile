@@ -9,7 +9,9 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-RUN pip install --user --no-cache-dir --default-timeout=100 --retries=5 -r requirements.txt
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+RUN pip install --no-cache-dir --default-timeout=100 --retries=5 -r requirements.txt
 
 # ── Runtime stage ──
 FROM python:3.11-slim
@@ -18,6 +20,7 @@ FROM python:3.11-slim
 RUN apt-get update && apt-get install -y \
     libpq5 \
     curl \
+    dos2unix \
     && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user for security
@@ -26,15 +29,16 @@ RUN groupadd -r bloodchain && useradd -r -g bloodchain bloodchain
 WORKDIR /app
 
 # Copy Python dependencies from builder
-COPY --from=builder /root/.local /root/.local
+COPY --chown=bloodchain:bloodchain --from=builder /opt/venv /opt/venv
 
-ENV PATH=/root/.local/bin:$PATH \
+ENV PATH="/opt/venv/bin:$PATH" \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     DJANGO_SETTINGS_MODULE=config.settings
 
 # Copy entrypoint first and make executable
 COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN dos2unix /app/docker-entrypoint.sh
 RUN chmod +x /app/docker-entrypoint.sh
 
 # Copy application code

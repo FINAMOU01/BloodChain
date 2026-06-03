@@ -7,9 +7,15 @@ gunicorn==21.2.0
 
 # Caching and message broker - Redis client
 redis==5.0.1
+django-redis==5.4.0
 
 # ClickHouse Python client for analytics and data warehouse queries
 clickhouse-driver==0.2.10
 
 # CORS headers for cross-origin requests
 django-cors-headers==4.3.1
+
+# Configuration management
+python-decouple==3.8
+
+drf_yasg==1.21.7

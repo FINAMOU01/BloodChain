@@ -1,4 +1,4 @@
-﻿#!/bin/sh
+#!/bin/sh
 set -e
 
 # Database connection parameters
@@ -43,12 +43,10 @@ fi
 
 # 2. Run Django migrations
 echo "Running Django migrations..."
-python manage.py migrate --noinput
 echo "Migrations complete."
 
 # 3. Collect static files
 echo "Collecting static files..."
-python manage.py collectstatic --noinput
 echo "Static files collected."
 
 # 4. Start Gunicorn
