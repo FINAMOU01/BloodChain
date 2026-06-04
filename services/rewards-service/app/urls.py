@@ -1,7 +1,11 @@
-from django.urls import path
-from .views import MintRewardView, RewardListView
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import RewardViewSet, RedemptionViewSet
+
+router = DefaultRouter()
+router.register(r'rewards', RewardViewSet)
+router.register(r'redemptions', RedemptionViewSet)
 
 urlpatterns = [
-    path('mint/', MintRewardView.as_view(), name='mint-reward'),
-    path('list/', RewardListView.as_view(), name='reward-list'),
+    path('', include(router.urls)),
 ]

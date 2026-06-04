@@ -13,3 +13,10 @@ psycopg2-binary==2.9.9
 
 # CORS headers for cross-origin requests
 django-cors-headers==4.3.1
+
+# Environment variable configuration
+python-decouple==3.8
+
+django-prometheus==2.5.0
+
+drf-yasg==1.21.7

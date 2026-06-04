@@ -16,4 +16,12 @@ django-cors-headers==4.3.1
 
 # Async task queue for sending notifications and alerts
 celery==5.3.4
-django-prometheus
+django-prometheus==2.5.0
+
+django-redis==5.4.0
+
+# Environment variable configuration
+python-decouple==3.8
+
+# API documentation with Swagger/OpenAPI
+drf-yasg==1.21.7

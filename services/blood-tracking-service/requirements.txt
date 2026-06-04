@@ -19,4 +19,13 @@ django-cors-headers==4.3.1
 
 # Ethereum blockchain interaction - Use stable version compatible with Python 3.11
 web3==6.9.0
-django-prometheus
+django-prometheus==2.5.0
+
+# Environment variable configuration
+python-decouple==3.8
+
+
+django-redis==5.4.0
+
+# API documentation with Swagger/OpenAPI
+drf-yasg==1.21.7

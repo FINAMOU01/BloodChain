@@ -66,7 +66,7 @@ services:
     environment:
       CLICKHOUSE_DB: bloodchain_warehouse
       CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
-      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-clickhouse}
     ports:
       - "8123:8123"
       - "9000:9000"
@@ -240,7 +240,7 @@ services:
       retries: 3
     networks:
       - bloodchain-network
-    restart: unless-stopped
+    restart: "no"
 
   data-warehouse:
     build:

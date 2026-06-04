@@ -1,5 +1,7 @@
-﻿def login():
-    pass
+﻿from rest_framework import viewsets
+from .models import User
+from .serializers import UserSerializer
 
-def register():
-    pass
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
