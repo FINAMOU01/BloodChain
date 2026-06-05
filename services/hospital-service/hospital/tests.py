@@ -85,10 +85,9 @@ class HospitalAPITest(TestCase):
         assert response.status_code == 200
         assert response.data["name"] == "General"
 
-    def test_get_nonexistent_profile_returns_empty(self):
+    def test_get_nonexistent_profile_returns_404(self):
         response = self.client.get("/api/hospital/profile/unknown@test.com/")
-        assert response.status_code == 200
-        assert response.data["name"] == ""
+        assert response.status_code == 404
 
     def test_update_hospital_profile(self):
         Hospital.objects.create(
@@ -102,14 +101,14 @@ class HospitalAPITest(TestCase):
         assert response.status_code == 200
         assert response.data["name"] == "New Name"
 
-    def test_update_nonexistent_hospital_creates(self):
+    def test_update_nonexistent_hospital_returns_404(self):
         response = self.client.patch(
             "/api/hospital/profile/new@test.com/update/",
             {"name": "New Hosp", "location": "Here", "contact_phone": "+1"},
             format="json",
         )
-        assert response.status_code == 200
-        assert Hospital.objects.count() == 1
+        assert response.status_code == 404
+        assert Hospital.objects.count() == 0
 
     def test_create_blood_request(self):
         hosp = Hospital.objects.create(

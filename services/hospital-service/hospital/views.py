@@ -22,7 +22,7 @@ class HospitalCreateView(APIView):
 class HospitalProfileView(APIView):
     def get(self, request, email):
         try:
-            hospital = Hospital.objects.get(email=email)
+            hospital = Hospital.objects.get(contact_email=email)
             return Response(HospitalSerializer(hospital).data)
         except Hospital.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -35,7 +35,7 @@ class HospitalUpdateView(APIView):
     )
     def patch(self, request, email):
         try:
-            hospital = Hospital.objects.get(email=email)
+            hospital = Hospital.objects.get(contact_email=email)
         except Hospital.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = HospitalSerializer(hospital, data=request.data, partial=True)
