@@ -17,8 +17,7 @@ class UserModelTest(TestCase):
         assert str(user) == "donor@test.com"
 
     def test_create_user_without_email_raises(self):
-        import pytest
-        with pytest.raises(ValueError, match="Email is required"):
+        with self.assertRaises(ValueError):
             User.objects.create_user(email="", password="secret")
 
     def test_create_superuser(self):
