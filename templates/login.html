@@ -609,14 +609,38 @@
             }
         }
 
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-
-            if (email && password) {
-                alert('Sign in submitted successfully!');
-                // In a real app, this would send credentials to the backend
+            try {
+                const response = await fetch('/api/users/api/auth/login/', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email, password})
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    if (data.user.role === 'donor') {
+                        localStorage.setItem('donor_email', data.user.email);
+                        localStorage.removeItem('hospital_email');
+                        window.location.href = '/donor/dashboard/';
+                    } else if (data.user.role === 'hospital') {
+                        localStorage.setItem('hospital_email', data.user.email);
+                        localStorage.removeItem('donor_email');
+                        window.location.href = '/hospital/dashboard/';
+                    } else {
+                        localStorage.removeItem('donor_email');
+                        localStorage.removeItem('hospital_email');
+                        window.location.href = '/';
+                    }
+                } else {
+                    alert(data.error || 'Login failed');
+                }
+            } catch(err) {
+                alert('Connection error');
             }
         });
     </script>

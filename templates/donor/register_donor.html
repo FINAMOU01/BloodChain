@@ -156,6 +156,20 @@
                     </div>
                 </div>
 
+                <!-- Date of Birth -->
+                <div class="form-row full">
+                    <div class="form-group">
+                        <label for="dateOfBirth">
+                            <i class="bi bi-calendar"></i>
+                            Date of Birth
+                        </label>
+                        <div class="form-input-wrapper">
+                            <i class="form-input-icon bi bi-calendar"></i>
+                            <input type="date" id="dateOfBirth" class="form-input" required>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Password & Confirm Password -->
                 <div class="form-row">
                     <div class="form-group">
@@ -202,6 +216,27 @@
     </div>
 
     <script>
+        function getErrorMessage(data, fallback) {
+            if (!data || typeof data !== 'object') {
+                return fallback;
+            }
+
+            if (data.error) {
+                return data.error;
+            }
+
+            const firstError = Object.values(data)[0];
+            if (Array.isArray(firstError)) {
+                return firstError[0];
+            }
+
+            if (typeof firstError === 'string') {
+                return firstError;
+            }
+
+            return fallback;
+        }
+
         function togglePassword(fieldId) {
             const field = document.getElementById(fieldId);
             const button = event.target.closest('button');
@@ -218,18 +253,85 @@
             }
         }
 
-        document.getElementById('donorForm').addEventListener('submit', function(e) {
+        document.getElementById('donorForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const bloodType = document.getElementById('bloodType').value;
+            const city = document.getElementById('city').value;
+            const dateOfBirth = document.getElementById('dateOfBirth').value;
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
+            const submitBtn = e.target.querySelector('button[type="submit"]');
 
             if (password !== confirmPassword) {
                 alert('Passwords do not match!');
                 return;
             }
 
-            alert('Donor registration submitted successfully!');
-            // In a real app, this would send data to the backend
+            if (!dateOfBirth) {
+                alert('Please enter your date of birth.');
+                return;
+            }
+
+            // Set loading state
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span>Registering...</span>';
+
+            try {
+                // 1) Register in user-management (auth)
+                const response = await fetch('/api/users/api/auth/register/', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        email,
+                        password,
+                        password_confirm: confirmPassword,
+                        first_name: firstName,
+                        last_name: lastName,
+                        role: 'donor'
+                    })
+                });
+                const data = await response.json().catch(() => ({}));
+                if (response.ok) {
+                    // 2) Create Donor record in donor-service
+                    const donorResponse = await fetch('/api/donor/register/', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            full_name: firstName + ' ' + lastName,
+                            email: email,
+                            phone_number: phone,
+                            blood_type: bloodType,
+                            date_of_birth: dateOfBirth
+                        })
+                    });
+                    const donorData = await donorResponse.json().catch(() => ({}));
+                    if (!donorResponse.ok) {
+                        throw new Error(getErrorMessage(donorData, 'Donor profile creation failed'));
+                    }
+
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem('donor_email', email);
+
+                    alert('Registration successful!');
+                    window.location.href = '/donor/dashboard/';
+                } else {
+                    const errorMsg = getErrorMessage(data, 'Registration failed');
+                    alert(errorMsg);
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+            } catch(err) {
+                alert('Registration error: ' + err.message);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
         });
     </script>
 </body>

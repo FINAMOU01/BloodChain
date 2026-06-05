@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 
     <!-- Donor CSS -->
-    <link rel="stylesheet" href="../../static/css/donor.css">
+    <link rel="stylesheet" href="/static/css/donor.css">
 
     <style>
         /* Eligibility Specific Styles */
@@ -385,40 +385,40 @@
 
             <!-- Nav Links -->
             <nav class="sidebar-nav">
-                <a href="dashboard.html" class="nav-link">
+                <a href="/donor/dashboard/" class="nav-link">
                     <i class="bi bi-house-fill"></i>
                     <span>Dashboard</span>
                 </a>
-                <a href="donor_history.html" class="nav-link">
+                <a href="/donor/history/" class="nav-link">
                     <i class="bi bi-heart-pulse"></i>
                     <span>My Donations</span>
                 </a>
-                <a href="#" class="nav-link">
+                <a href="/donor/hospitals/" class="nav-link">
                     <i class="bi bi-hospital"></i>
                     <span>Nearby Hospitals</span>
                 </a>
-                <a href="donor_appointments.html" class="nav-link">
+                <a href="/donor/appointments/" class="nav-link">
                     <i class="bi bi-calendar-check"></i>
                     <span>Appointments</span>
                 </a>
-                <a href="donor_eligibility.html" class="nav-link active">
+                <a href="/donor/eligibility/" class="nav-link active">
                     <i class="bi bi-shield-check"></i>
                     <span>My Eligibility</span>
                 </a>
-                <a href="donor_rewards.html" class="nav-link">
+                <a href="/donor/rewards/" class="nav-link">
                     <i class="bi bi-gift"></i>
                     <span>Rewards & Points</span>
                 </a>
-                <a href="emergency_alerts.html" class="nav-link">
+                <a href="/donor/alerts/" class="nav-link">
                     <i class="bi bi-exclamation-triangle-fill"></i>
                     <span>Emergency Alerts</span>
                 </a>
-                <a href="#" class="nav-link">
+                <a href="/donor/notifications/" class="nav-link">
                     <i class="bi bi-bell-fill"></i>
                     <span>Notifications</span>
-                    <span class="nav-badge">2</span>
+                    <span class="nav-badge"></span>
                 </a>
-                <a href="donor_profile.html" class="nav-link">
+                <a href="/donor/profile/" class="nav-link">
                     <i class="bi bi-gear-fill"></i>
                     <span>Settings</span>
                 </a>
@@ -426,8 +426,8 @@
 
             <!-- Footer -->
             <div class="sidebar-footer">
-                <p>John Doe</p>
-                <a href="#" class="logout-link">Logout</a>
+                <p>Donor</p>
+                <a href="/login/" class="logout-link">Logout</a>
             </div>
         </aside>
 
@@ -439,12 +439,12 @@
                     <h1 class="topbar-title">My Eligibility</h1>
                 </div>
                 <div class="topbar-right">
-                    <span class="topbar-date">Thursday, May 23 2026</span>
+                    <span class="topbar-date"></span>
                     <div class="topbar-notification">
                         <i class="bi bi-bell-fill"></i>
-                        <span class="notification-badge">2</span>
+                        <span class="notification-badge"></span>
                     </div>
-                    <div class="topbar-avatar">JD</div>
+                    <div class="topbar-avatar">D</div>
                 </div>
             </header>
 
@@ -457,27 +457,27 @@
                             <i class="bi bi-check-circle-fill"></i>
                         </div>
                         <div>
-                            <h2>You Are Eligible to Donate</h2>
-                            <p>Your health status meets all requirements for blood donation. You can schedule an appointment immediately.</p>
+                            <h2 id="is-eligible-text">You Are Eligible to Donate</h2>
+                            <p id="is-eligible-sub">Your health status meets all requirements for blood donation. You can schedule an appointment immediately.</p>
                         </div>
                     </div>
 
                     <!-- COUNTDOWN -->
                     <div class="countdown-grid">
                         <div class="countdown-card">
-                            <div class="countdown-number">26</div>
+                            <div class="countdown-number" id="days-until-next">26</div>
                             <div class="countdown-label">Days Until Next Donation</div>
-                            <div class="countdown-sublabel">June 18, 2026</div>
+                            <div class="countdown-sublabel" id="next-eligible-date">June 18, 2026</div>
                         </div>
                         <div class="countdown-card">
-                            <div class="countdown-number">12</div>
+                            <div class="countdown-number" id="total-donations">12</div>
                             <div class="countdown-label">Total Donations</div>
-                            <div class="countdown-sublabel">4.8L Blood</div>
+                            <div class="countdown-sublabel">Completed</div>
                         </div>
                         <div class="countdown-card">
-                            <div class="countdown-number">O+</div>
+                            <div class="countdown-number" id="blood-type-display">O+</div>
                             <div class="countdown-label">Your Blood Type</div>
-                            <div class="countdown-sublabel">Universal Donor</div>
+                            <div class="countdown-sublabel" id="donor-age"></div>
                         </div>
                     </div>
 
@@ -494,7 +494,7 @@
                                 </div>
                                 <div class="checklist-content">
                                     <h4>Age Requirement</h4>
-                                    <p>Age 18-65 years old ✓ (Current: 40 years)</p>
+                                    <p>Age 18-65 years old ✓ (Current: <span id="age-text">40</span> years)</p>
                                 </div>
                             </div>
                             <div class="checklist-item">
@@ -530,7 +530,7 @@
                                 </div>
                                 <div class="checklist-content">
                                     <h4>Last Donation</h4>
-                                    <p>Minimum 56 days (8 weeks) between donations ✓ (Current: 58 days)</p>
+                                    <p>Minimum 56 days (8 weeks) between donations</p>
                                 </div>
                             </div>
                             <div class="checklist-item">
@@ -539,7 +539,7 @@
                                 </div>
                                 <div class="checklist-content">
                                     <h4>Disease Screening</h4>
-                                    <p>No signs of infectious disease ✓ (Last tested: April 2026)</p>
+                                    <p>No signs of infectious disease ✓ (Last tested)</p>
                                 </div>
                             </div>
                         </div>
@@ -613,7 +613,7 @@
 
                     <!-- ACTION BAR -->
                     <div class="action-bar">
-                        <a href="donor_appointments.html" class="btn btn-primary">
+                        <a href="/donor/appointments/" class="btn btn-primary">
                             <i class="bi bi-calendar-plus-fill"></i>
                             Schedule Donation
                         </a>
@@ -626,5 +626,32 @@
             </div>
         </main>
     </div>
+
+    <script src="/static/js/donor-auth.js"></script>
+    <script>
+        const DONOR_EMAIL = window.BloodChainDonor.requireAuth();
+        window.BloodChainDonor.setupShell();
+        window.BloodChainDonor.updateNotificationBadges(DONOR_EMAIL);
+
+        function loadEligibility() {
+            fetch(`/api/donor/eligibility/${DONOR_EMAIL}/`)
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('is-eligible-text').textContent = data.is_eligible ? 'You Are Eligible to Donate' : 'Not Eligible to Donate Right Now';
+                    document.getElementById('is-eligible-sub').textContent = data.is_eligible
+                        ? 'Your health status meets all requirements for blood donation. You can schedule an appointment immediately.'
+                        : `You need to wait ${data.days_until_next} more days until you are eligible.`;
+                    document.getElementById('next-eligible-date').textContent = data.next_eligible_date;
+                    document.getElementById('days-until-next').textContent = data.days_until_next;
+                    document.getElementById('total-donations').textContent = data.total_donations;
+                    document.getElementById('blood-type-display').textContent = data.blood_type;
+                    document.getElementById('age-text').textContent = data.age;
+                    document.getElementById('donor-age').textContent = data.age + ' years old';
+                })
+                .catch(err => console.error('Failed to load eligibility', err));
+        }
+
+        document.addEventListener('DOMContentLoaded', loadEligibility);
+    </script>
 </body>
 </html>

@@ -18,7 +18,7 @@
     <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
 
     <!-- Donor CSS -->
-    <link rel="stylesheet" href="../../static/css/donor.css">
+    <link rel="stylesheet" href="/static/css/donor.css">
 
     <style>
         /* Page Specific Styles */
@@ -299,40 +299,40 @@
 
             <!-- Nav Links -->
             <nav class="sidebar-nav">
-                <a href="dashboard.html" class="nav-link">
+                <a href="/donor/dashboard/" class="nav-link">
                     <i class="bi bi-house-fill"></i>
                     <span>Dashboard</span>
                 </a>
-                <a href="donor_history.html" class="nav-link">
+                <a href="/donor/history/" class="nav-link">
                     <i class="bi bi-heart-pulse"></i>
                     <span>My Donations</span>
                 </a>
-                <a href="nearby_hospitals.html" class="nav-link active">
+                <a href="/donor/hospitals/" class="nav-link active">
                     <i class="bi bi-hospital"></i>
                     <span>Nearby Hospitals</span>
                 </a>
-                <a href="donor_appointments.html" class="nav-link">
+                <a href="/donor/appointments/" class="nav-link">
                     <i class="bi bi-calendar-check"></i>
                     <span>Appointments</span>
                 </a>
-                <a href="donor_eligibility.html" class="nav-link">
+                <a href="/donor/eligibility/" class="nav-link">
                     <i class="bi bi-shield-check"></i>
                     <span>My Eligibility</span>
                 </a>
-                <a href="donor_rewards.html" class="nav-link">
+                <a href="/donor/rewards/" class="nav-link">
                     <i class="bi bi-gift"></i>
                     <span>Rewards & Points</span>
                 </a>
-                <a href="emergency_alerts.html" class="nav-link">
+                <a href="/donor/alerts/" class="nav-link">
                     <i class="bi bi-exclamation-triangle-fill"></i>
                     <span>Emergency Alerts</span>
                 </a>
-                <a href="#" class="nav-link">
+                <a href="/donor/notifications/" class="nav-link">
                     <i class="bi bi-bell-fill"></i>
                     <span>Notifications</span>
-                    <span class="nav-badge">2</span>
+                    <span class="nav-badge"></span>
                 </a>
-                <a href="donor_profile.html" class="nav-link">
+                <a href="/donor/profile/" class="nav-link">
                     <i class="bi bi-gear-fill"></i>
                     <span>Settings</span>
                 </a>
@@ -340,8 +340,8 @@
 
             <!-- Footer -->
             <div class="sidebar-footer">
-                <p>John Doe</p>
-                <a href="#" class="logout-link">Logout</a>
+                <p>Donor</p>
+                <a href="/login/" class="logout-link">Logout</a>
             </div>
         </aside>
 
@@ -351,7 +351,7 @@
             <div class="topbar">
                 <div class="topbar-left">
                     <div class="topbar-title">Nearby Hospitals</div>
-                    <div class="topbar-date">May 23, 2026</div>
+                    <div class="topbar-date"></div>
                 </div>
             </div>
 
@@ -361,22 +361,22 @@
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-label">Total Hospitals</div>
-                        <div class="stat-value">18</div>
+                        <div class="stat-value" id="total-hospitals">0</div>
                         <div class="stat-small">In your area</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">Accepting Donations</div>
-                        <div class="stat-value">16</div>
+                        <div class="stat-value" id="accepting-hospitals">0</div>
                         <div class="stat-small">Currently open</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">Avg Distance</div>
-                        <div class="stat-value">3.2 km</div>
+                        <div class="stat-value" id="avg-distance">-</div>
                         <div class="stat-small">From your location</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">Highly Rated</div>
-                        <div class="stat-value">14</div>
+                        <div class="stat-value" id="active-hospitals">0</div>
                         <div class="stat-small">4+ stars</div>
                     </div>
                 </div>
@@ -419,7 +419,12 @@
         </div>
     </div>
 
+    <script src="/static/js/donor-auth.js"></script>
     <script>
+        const DONOR_EMAIL = window.BloodChainDonor.requireAuth();
+        window.BloodChainDonor.setupShell();
+        window.BloodChainDonor.updateNotificationBadges(DONOR_EMAIL);
+
         // Initialize map
         const map = L.map('hospital-map').setView([3.8667, 11.5167], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -428,7 +433,7 @@
         }).addTo(map);
 
         // Hospital data
-        const hospitals = [
+        let hospitals = [
             {
                 name: 'Centre Hospitalier de Yaoundé',
                 address: 'Avenue Kennedy, Yaoundé',
@@ -503,9 +508,25 @@
             }
         ];
 
-        // Add markers to map
-        const markers = {};
-        hospitals.forEach((hospital, index) => {
+        let markers = {};
+
+        function refreshStats() {
+            const openHospitals = hospitals.filter(hospital => hospital.status === 'open').length;
+            const avgDistance = hospitals.length
+                ? (hospitals.reduce((sum, hospital) => sum + Number(hospital.distance || 0), 0) / hospitals.length).toFixed(1) + ' km'
+                : '-';
+
+            document.getElementById('total-hospitals').textContent = hospitals.length;
+            document.getElementById('accepting-hospitals').textContent = openHospitals;
+            document.getElementById('avg-distance').textContent = avgDistance;
+            document.getElementById('active-hospitals').textContent = openHospitals;
+        }
+
+        function renderMarkers() {
+            Object.values(markers).forEach(marker => map.removeLayer(marker));
+            markers = {};
+
+            hospitals.forEach((hospital, index) => {
             const icon = L.divIcon({
                 html: `<div style="background: #B91C1C; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">${index + 1}</div>`,
                 iconSize: [40, 40],
@@ -517,7 +538,8 @@
                 .bindPopup(`<strong>${hospital.name}</strong><br>${hospital.address}<br>Distance: ${hospital.distance}km`);
 
             markers[index] = marker;
-        });
+            });
+        }
 
         // Render hospital cards
         function renderHospitals(filtered = hospitals) {
@@ -601,8 +623,37 @@
         document.getElementById('bloodTypeFilter').addEventListener('change', filterHospitals);
         document.getElementById('statusFilter').addEventListener('change', filterHospitals);
 
-        // Initial render
-        renderHospitals();
+        function loadHospitals() {
+            fetch('/api/location/locations/?location_type=hospital')
+                .then(response => response.ok ? response.json() : Promise.reject())
+                .then(data => {
+                    const results = Array.isArray(data) ? data : data.results || [];
+                    if (results.length) {
+                        hospitals = results.map(location => ({
+                            name: location.name,
+                            address: location.address,
+                            distance: location.distance || 0,
+                            phone: location.phone || 'Not available',
+                            hours: 'Contact hospital',
+                            status: location.is_active ? 'open' : 'closed',
+                            bloodTypes: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
+                            lng: location.longitude,
+                            lat: location.latitude,
+                            nextAvailable: 'Contact hospital'
+                        }));
+                    }
+                    refreshStats();
+                    renderMarkers();
+                    renderHospitals();
+                })
+                .catch(() => {
+                    refreshStats();
+                    renderMarkers();
+                    renderHospitals();
+                });
+        }
+
+        loadHospitals();
     </script>
 </body>
 </html>

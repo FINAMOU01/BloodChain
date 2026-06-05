@@ -25,3 +25,9 @@ class BloodBagDetailView(APIView):
             return Response(BloodBagSerializer(bag).data)
         except BloodBag.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
+class BloodBagDonorListView(APIView):
+    def get(self, request, donor_email):
+        bags = BloodBag.objects.filter(donor_email=donor_email).order_by('-collected_at')
+        serializer = BloodBagSerializer(bags, many=True)
+        return Response(serializer.data)

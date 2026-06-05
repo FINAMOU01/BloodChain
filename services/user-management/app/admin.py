@@ -3,6 +3,6 @@ from .models import User
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('id', 'username', 'email', 'created_at')
-    search_fields = ('username', 'email')
+    list_display = ('id', 'email', 'first_name', 'last_name', 'role', 'created_at')
+    search_fields = ('email', 'first_name', 'last_name')
     readonly_fields = ('created_at', 'updated_at')

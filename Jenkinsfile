@@ -23,7 +23,6 @@ pipeline {
             steps {
                 echo '🔍 Detecting which services changed...'
                 script {
-                    // Get list of changed files in this push
                     def changedFiles = sh(
                         script: "git diff --name-only HEAD~1 HEAD || echo 'services/'",
                         returnStdout: true
@@ -31,16 +30,20 @@ pipeline {
 
                     echo "Changed files:\n${changedFiles}"
 
-                    // Detect which services are affected
-                    env.BUILD_USER_MGMT     = changedFiles.contains('services/user-management')     ? 'true' : 'false'
-                    env.BUILD_DONOR         = changedFiles.contains('services/donor-service')        ? 'true' : 'false'
-                    env.BUILD_HOSPITAL      = changedFiles.contains('services/hospital-service')     ? 'true' : 'false'
-                    env.BUILD_TRACKING      = changedFiles.contains('services/blood-tracking-service') ? 'true' : 'false'
-                    env.BUILD_NOTIFICATIONS = changedFiles.contains('services/notifications-service') ? 'true' : 'false'
-                    env.BUILD_REWARDS       = changedFiles.contains('services/rewards-service')      ? 'true' : 'false'
-                    env.BUILD_LOCATION      = changedFiles.contains('services/location-service')     ? 'true' : 'false'
-                    env.BUILD_BLOCKCHAIN    = changedFiles.contains('services/blockchain-gateway')   ? 'true' : 'false'
-                    env.BUILD_WAREHOUSE     = changedFiles.contains('services/data-warehouse')       ? 'true' : 'false'
+                    env.BUILD_USER_MGMT     = changedFiles.contains('services/user-management')          ? 'true' : 'false'
+                    env.BUILD_DONOR         = changedFiles.contains('services/donor-service')             ? 'true' : 'false'
+                    env.BUILD_HOSPITAL      = changedFiles.contains('services/hospital-service')          ? 'true' : 'false'
+                    env.BUILD_TRACKING      = changedFiles.contains('services/blood-tracking-service')    ? 'true' : 'false'
+                    env.BUILD_NOTIFICATIONS = changedFiles.contains('services/notifications-service')     ? 'true' : 'false'
+                    env.BUILD_REWARDS       = changedFiles.contains('services/rewards-service')           ? 'true' : 'false'
+                    env.BUILD_LOCATION      = changedFiles.contains('services/location-service')          ? 'true' : 'false'
+                    env.BUILD_BLOCKCHAIN    = changedFiles.contains('services/blockchain-gateway')        ? 'true' : 'false'
+                    env.BUILD_WAREHOUSE     = changedFiles.contains('services/data-warehouse')            ? 'true' : 'false'
+                    env.BUILD_FRONTEND      = (
+                        changedFiles.contains('services/frontend-service') ||
+                        changedFiles.contains('templates/') ||
+                        changedFiles.contains('static/')
+                    ) ? 'true' : 'false'
                 }
             }
         }
@@ -50,15 +53,16 @@ pipeline {
                 echo '🐳 Building Docker images for changed services...'
                 script {
                     def services = [
-                        [name: 'user-management',       path: 'services/user-management',        build: env.BUILD_USER_MGMT],
-                        [name: 'donor-service',         path: 'services/donor-service',           build: env.BUILD_DONOR],
-                        [name: 'hospital-service',      path: 'services/hospital-service',        build: env.BUILD_HOSPITAL],
-                        [name: 'blood-tracking-service',path: 'services/blood-tracking-service',  build: env.BUILD_TRACKING],
-                        [name: 'notifications-service', path: 'services/notifications-service',   build: env.BUILD_NOTIFICATIONS],
-                        [name: 'rewards-service',       path: 'services/rewards-service',         build: env.BUILD_REWARDS],
-                        [name: 'location-service',      path: 'services/location-service',        build: env.BUILD_LOCATION],
-                        [name: 'blockchain-gateway',    path: 'services/blockchain-gateway',      build: env.BUILD_BLOCKCHAIN],
-                        [name: 'data-warehouse',        path: 'services/data-warehouse',          build: env.BUILD_WAREHOUSE],
+                        [name: 'user-management',        path: 'services/user-management',         dockerfile: 'services/user-management/Dockerfile',        build: env.BUILD_USER_MGMT],
+                        [name: 'donor-service',          path: 'services/donor-service',            dockerfile: 'services/donor-service/Dockerfile',           build: env.BUILD_DONOR],
+                        [name: 'hospital-service',       path: 'services/hospital-service',         dockerfile: 'services/hospital-service/Dockerfile',        build: env.BUILD_HOSPITAL],
+                        [name: 'blood-tracking-service', path: 'services/blood-tracking-service',   dockerfile: 'services/blood-tracking-service/Dockerfile',  build: env.BUILD_TRACKING],
+                        [name: 'notifications-service',  path: 'services/notifications-service',    dockerfile: 'services/notifications-service/Dockerfile',   build: env.BUILD_NOTIFICATIONS],
+                        [name: 'rewards-service',        path: 'services/rewards-service',          dockerfile: 'services/rewards-service/Dockerfile',         build: env.BUILD_REWARDS],
+                        [name: 'location-service',       path: 'services/location-service',         dockerfile: 'services/location-service/Dockerfile',        build: env.BUILD_LOCATION],
+                        [name: 'blockchain-gateway',     path: 'services/blockchain-gateway',       dockerfile: 'services/blockchain-gateway/Dockerfile',      build: env.BUILD_BLOCKCHAIN],
+                        [name: 'data-warehouse',         path: 'services/data-warehouse',           dockerfile: 'services/data-warehouse/Dockerfile',          build: env.BUILD_WAREHOUSE],
+                        [name: 'frontend-service',       path: '.',                                 dockerfile: 'services/frontend-service/Dockerfile',        build: env.BUILD_FRONTEND],
                     ]
 
                     services.each { svc ->
@@ -66,6 +70,7 @@ pipeline {
                             echo "Building ${svc.name}..."
                             sh """
                                 docker build \
+                                  -f ${svc.dockerfile} \
                                   -t ${DOCKER_HUB_USER}/${IMAGE_PREFIX}-${svc.name}:${env.GIT_COMMIT} \
                                   -t ${DOCKER_HUB_USER}/${IMAGE_PREFIX}-${svc.name}:latest \
                                   ${svc.path}
@@ -82,26 +87,26 @@ pipeline {
             steps {
                 echo '🧪 Running tests for changed services...'
                 script {
-                    if (env.BUILD_DONOR == 'true') {
-                        sh '''
-                            docker run --rm \
-                              ${DOCKER_HUB_USER}/${IMAGE_PREFIX}-donor-service:latest \
-                              python manage.py test --verbosity=2
-                        '''
-                    }
-                    if (env.BUILD_HOSPITAL == 'true') {
-                        sh '''
-                            docker run --rm \
-                              ${DOCKER_HUB_USER}/${IMAGE_PREFIX}-hospital-service:latest \
-                              python manage.py test --verbosity=2
-                        '''
-                    }
-                    if (env.BUILD_TRACKING == 'true') {
-                        sh '''
-                            docker run --rm \
-                              ${DOCKER_HUB_USER}/${IMAGE_PREFIX}-blood-tracking-service:latest \
-                              python manage.py test --verbosity=2
-                        '''
+                    def testServices = [
+                        [name: 'donor-service',          build: env.BUILD_DONOR],
+                        [name: 'hospital-service',       build: env.BUILD_HOSPITAL],
+                        [name: 'blood-tracking-service', build: env.BUILD_TRACKING],
+                        [name: 'notifications-service',  build: env.BUILD_NOTIFICATIONS],
+                        [name: 'user-management',        build: env.BUILD_USER_MGMT],
+                    ]
+
+                    testServices.each { svc ->
+                        if (svc.build == 'true') {
+                            echo "Testing ${svc.name}..."
+                            sh """
+                                docker run --rm \
+                                  -e DJANGO_SETTINGS_MODULE=config.settings_test \
+                                  -e SECRET_KEY=test-secret-key-12345 \
+                                  -e DEBUG=True \
+                                  ${DOCKER_HUB_USER}/${IMAGE_PREFIX}-${svc.name}:latest \
+                                  python manage.py test --verbosity=2
+                            """
+                        }
                     }
                     echo '✅ All tests passed.'
                 }
@@ -109,7 +114,6 @@ pipeline {
         }
 
         stage('Push to Docker Hub') {
-            // Only push when merging into dev or main
             when {
                 anyOf {
                     branch 'dev'
@@ -132,7 +136,8 @@ pipeline {
                             'user-management', 'donor-service', 'hospital-service',
                             'blood-tracking-service', 'notifications-service',
                             'rewards-service', 'location-service',
-                            'blockchain-gateway', 'data-warehouse'
+                            'blockchain-gateway', 'data-warehouse',
+                            'frontend-service'
                         ]
 
                         services.each { name ->
@@ -147,7 +152,6 @@ pipeline {
         }
 
         stage('Deploy to K3s') {
-            // Only deploy when merging into main
             when {
                 branch 'main'
             }

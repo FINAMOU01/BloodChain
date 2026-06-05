@@ -1,7 +1,5 @@
 from django.db import models
 
-# Create your models here.
-
 class Donor(models.Model):
     BLOOD_TYPE_CHOICES = [
         ('A+', 'A+'),
@@ -24,3 +22,27 @@ class Donor(models.Model):
 
     def __str__(self):
         return f"{self.full_name} ({self.blood_type})"
+
+
+class Appointment(models.Model):
+    STATUS_CHOICES = [
+        ('confirmed', 'Confirmed'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    donor_email = models.EmailField()
+    hospital_name = models.CharField(max_length=200)
+    appointment_type = models.CharField(max_length=100, default='regular')
+    appointment_date = models.DateField()
+    appointment_time = models.TimeField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='confirmed')
+    contact_person = models.CharField(max_length=200, blank=True, default='')
+    contact_phone = models.CharField(max_length=20, blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-appointment_date', '-appointment_time']
+
+    def __str__(self):
+        return f"{self.hospital_name} - {self.donor_email} ({self.status})"
