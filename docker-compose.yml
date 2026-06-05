@@ -52,7 +52,7 @@ services:
     volumes:
       - mongo_data:/data/db
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test: ["CMD", "mongosh", "-u", "${MONGO_USER:-admin}", "-p", "${MONGO_PASSWORD:-admin}", "--eval", "db.adminCommand('ping')"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -244,7 +244,7 @@ services:
       retries: 3
     networks:
       - bloodchain-network
-    restart: "no"
+    restart: unless-stopped
 
   data-warehouse:
     build:
@@ -401,17 +401,28 @@ services:
     volumes:
       - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./infra/nginx/bloodchain.conf:/etc/nginx/conf.d/bloodchain.conf:ro
+    command: ["/bin/sh", "-c", "rm -f /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]
     depends_on:
-      - frontend-service
-      - donor-service
-      - hospital-service
-      - blood-tracking-service
-      - notifications-service
-      - blockchain-gateway
-      - data-warehouse
-      - location-service
-      - rewards-service
-      - user-management
+      frontend-service:
+        condition: service_healthy
+      donor-service:
+        condition: service_healthy
+      hospital-service:
+        condition: service_healthy
+      blood-tracking-service:
+        condition: service_healthy
+      notifications-service:
+        condition: service_healthy
+      blockchain-gateway:
+        condition: service_healthy
+      data-warehouse:
+        condition: service_healthy
+      location-service:
+        condition: service_healthy
+      rewards-service:
+        condition: service_healthy
+      user-management:
+        condition: service_healthy
     networks:
       - bloodchain-network
     restart: unless-stopped

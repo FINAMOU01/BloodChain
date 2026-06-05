@@ -4,8 +4,8 @@
 def get_config():
     """Load configuration with fallback."""
     try:
-        from config import LOCAL_RPC_URL, SEPOLIA_RPC_URL
-        return LOCAL_RPC_URL, SEPOLIA_RPC_URL
+        from config import LOCAL_RPC_URL, WEB3_PROVIDER_URI
+        return LOCAL_RPC_URL, WEB3_PROVIDER_URI
     except (ImportError, ModuleNotFoundError):
         # Fallback if config module not available
         return "http://localhost:8545", None
@@ -15,9 +15,9 @@ def get_web3():
     """Get Web3 instance."""
     try:
         from web3 import Web3
-        local_rpc, sepolia_rpc = get_config()
-        if sepolia_rpc:
-            return Web3(Web3.HTTPProvider(sepolia_rpc))
+        local_rpc, provider_uri = get_config()
+        if provider_uri:
+            return Web3(Web3.HTTPProvider(provider_uri))
         return Web3(Web3.HTTPProvider(local_rpc))
     except (ImportError, ModuleNotFoundError):
         return None

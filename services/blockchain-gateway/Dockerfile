@@ -50,4 +50,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 
 EXPOSE 8000
 
-CMD ["python", "blockchain_service.py"]
+CMD ["python", "app.py"]
