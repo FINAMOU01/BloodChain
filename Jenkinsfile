@@ -100,11 +100,12 @@ pipeline {
                             echo "Testing ${svc.name}..."
                             sh """
                                 docker run --rm \
+                                  --entrypoint python \
                                   -e DJANGO_SETTINGS_MODULE=config.settings_test \
                                   -e SECRET_KEY=test-secret-key-12345 \
                                   -e DEBUG=True \
                                   ${DOCKER_HUB_USER}/${IMAGE_PREFIX}-${svc.name}:latest \
-                                  python manage.py test --verbosity=2
+                                  manage.py test --verbosity=2
                             """
                         }
                     }
