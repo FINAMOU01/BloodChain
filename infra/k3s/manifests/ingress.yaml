@@ -1,0 +1,81 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: bloodchain-ingress
+  namespace: bloodchain
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-service
+                port:
+                  number: 8000
+          - path: /api/users/
+            pathType: Prefix
+            backend:
+              service:
+                name: user-management
+                port:
+                  number: 8000
+          - path: /api/donors/
+            pathType: Prefix
+            backend:
+              service:
+                name: donor-service
+                port:
+                  number: 8000
+          - path: /api/hospitals/
+            pathType: Prefix
+            backend:
+              service:
+                name: hospital-service
+                port:
+                  number: 8000
+          - path: /api/tracking/
+            pathType: Prefix
+            backend:
+              service:
+                name: blood-tracking-service
+                port:
+                  number: 8000
+          - path: /api/notifications/
+            pathType: Prefix
+            backend:
+              service:
+                name: notifications-service
+                port:
+                  number: 8000
+          - path: /api/rewards/
+            pathType: Prefix
+            backend:
+              service:
+                name: rewards-service
+                port:
+                  number: 8000
+          - path: /api/location/
+            pathType: Prefix
+            backend:
+              service:
+                name: location-service
+                port:
+                  number: 8000
+          - path: /api/blockchain/
+            pathType: Prefix
+            backend:
+              service:
+                name: blockchain-gateway
+                port:
+                  number: 8000
+          - path: /api/analytics/
+            pathType: Prefix
+            backend:
+              service:
+                name: data-warehouse
+                port:
+                  number: 8000

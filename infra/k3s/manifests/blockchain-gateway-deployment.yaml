@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blockchain-gateway
+  namespace: bloodchain
+  labels:
+    app: blockchain-gateway
+    component: service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: blockchain-gateway
+      component: service
+  template:
+    metadata:
+      labels:
+        app: blockchain-gateway
+        component: service
+    spec:
+      containers:
+        - name: blockchain-gateway
+          image: finamou/bloodchain-blockchain-gateway:latest
+          command: ["sh", "-c", "python blockchain_service.py; tail -f /dev/null"]
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - secretRef:
+                name: bloodchain-secrets
+          env:
+            - name: WEB3_PROVIDER_URI
+              valueFrom:
+                secretKeyRef:
+                  name: bloodchain-secrets
+                  key: WEB3_PROVIDER_URI
+            - name: PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: bloodchain-secrets
+                  key: PRIVATE_KEY
+          livenessProbe:
+            httpGet:
+              path: /health/
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health/
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: blockchain-gateway
+  namespace: bloodchain
+  labels:
+    app: blockchain-gateway
+    component: service
+spec:
+  ports:
+    - port: 8000
+      targetPort: 8000
+  selector:
+    app: blockchain-gateway
+    component: service
