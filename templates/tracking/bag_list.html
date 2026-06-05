@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blood Bag Tracking - BloodChain</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Hospital CSS (reusing for tracking portal) -->
+    <link rel="stylesheet" href="../../static/css/hospital.css">
+
+    <style>
+        /* Blood Bag List Specific Styles */
+        .search-filter-container {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 12px 10px 36px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--red);
+            box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.1);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .filter-btn {
+            padding: 8px 14px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--white);
+            color: var(--text);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: var(--red);
+            color: var(--white);
+            border-color: var(--red);
+        }
+
+        /* Blood Bag Table */
+        .bags-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(44, 24, 16, 0.05);
+        }
+
+        .bags-table thead {
+            background: var(--red-light);
+        }
+
+        .bags-table th {
+            padding: 14px 16px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .bags-table tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background-color 0.2s;
+        }
+
+        .bags-table tbody tr:hover {
+            background: #FFFBF9;
+        }
+
+        .bags-table td {
+            padding: 12px 16px;
+            font-size: 13px;
+            color: var(--text);
+        }
+
+        .bag-id {
+            font-weight: 600;
+            color: var(--red);
+            cursor: pointer;
+        }
+
+        .bag-id:hover {
+            text-decoration: underline;
+        }
+
+        .blood-type-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 10px;
+            background: var(--red-light);
+            color: var(--red);
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 12px;
+            min-width: 45px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-available {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .status-transit {
+            background: #FEF08A;
+            color: #854D0E;
+        }
+
+        .status-in-use {
+            background: #DBEAFE;
+            color: #0C4A6E;
+        }
+
+        .status-expired {
+            background: #FEE2E2;
+            color: #7F1D1D;
+        }
+
+        .location-cell {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .expiry-soon {
+            color: var(--orange);
+            font-weight: 600;
+        }
+
+        .expiry-expired {
+            color: var(--red);
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 6px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            background: var(--white);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .action-btn:hover {
+            background: var(--red);
+            color: var(--white);
+            border-color: var(--red);
+        }
+
+        /* Stats Grid */
+        .bags-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .bag-stat-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .bag-stat-label {
+            font-size: 12px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .bag-stat-value {
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--red);
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .page-btn {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            background: var(--white);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .page-btn:hover,
+        .page-btn.active {
+            background: var(--red);
+            color: var(--white);
+            border-color: var(--red);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .search-filter-container {
+                flex-direction: column;
+            }
+
+            .search-box {
+                min-width: 100%;
+            }
+
+            .filter-group {
+                width: 100%;
+                overflow-x: auto;
+                padding-bottom: 8px;
+            }
+
+            .bags-table {
+                font-size: 12px;
+            }
+
+            .bags-table td,
+            .bags-table th {
+                padding: 10px 8px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .action-btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .bags-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .bags-table {
+                font-size: 11px;
+            }
+
+            .bags-table td,
+            .bags-table th {
+                padding: 8px 6px;
+            }
+
+            .search-box input {
+                padding: 8px 10px 8px 32px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="d-flex">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="blood-drop-icon"></div>
+                <span>BloodChain</span>
+            </div>
+
+            <!-- Nav Links -->
+            <nav class="sidebar-nav">
+                <a href="bag_list.html" class="nav-link active">
+                    <i class="bi bi-list-ul"></i>
+                    <span>Blood Bags</span>
+                </a>
+                <a href="bag_timeline.html" class="nav-link">
+                    <i class="bi bi-clock-history"></i>
+                    <span>Timeline</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-graph-up"></i>
+                    <span>Analytics</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    <span>Locations</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <span>Alerts</span>
+                    <span class="nav-badge">2</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="bi bi-gear-fill"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+
+            <!-- Footer -->
+            <div class="sidebar-footer">
+                <p>Tracking System</p>
+                <a href="#" class="logout-link">Logout</a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-content">
+            <!-- TOPBAR -->
+            <div class="topbar">
+                <div class="topbar-left">
+                    <div class="topbar-title">Blood Bag Tracking</div>
+                    <div class="topbar-date">May 23, 2026</div>
+                </div>
+                <div class="topbar-right">
+                    <i class="bi bi-droplet-fill" style="color: var(--red); font-size: 18px;"></i>
+                </div>
+            </div>
+
+            <!-- PAGE BODY -->
+            <div class="page-body">
+                <!-- Stats -->
+                <div class="bags-stats">
+                    <div class="bag-stat-card">
+                        <div class="bag-stat-label">Total Bags</div>
+                        <div class="bag-stat-value">847</div>
+                    </div>
+                    <div class="bag-stat-card">
+                        <div class="bag-stat-label">Available</div>
+                        <div class="bag-stat-value">612</div>
+                    </div>
+                    <div class="bag-stat-card">
+                        <div class="bag-stat-label">In Transit</div>
+                        <div class="bag-stat-value">156</div>
+                    </div>
+                    <div class="bag-stat-card">
+                        <div class="bag-stat-label">Expiring Soon</div>
+                        <div class="bag-stat-value">21</div>
+                    </div>
+                </div>
+
+                <!-- Search & Filters -->
+                <div class="search-filter-container">
+                    <div class="search-box">
+                        <i class="bi bi-search"></i>
+                        <input type="text" id="searchInput" placeholder="Search by bag ID, blood type..." onkeyup="filterBags()">
+                    </div>
+                    <div class="filter-group">
+                        <button class="filter-btn active" onclick="filterByStatus('all')">All</button>
+                        <button class="filter-btn" onclick="filterByStatus('available')">Available</button>
+                        <button class="filter-btn" onclick="filterByStatus('transit')">In Transit</button>
+                        <button class="filter-btn" onclick="filterByStatus('in-use')">In Use</button>
+                        <button class="filter-btn" onclick="filterByStatus('expired')">Expired</button>
+                    </div>
+                </div>
+
+                <!-- Blood Bags Table -->
+                <table class="bags-table">
+                    <thead>
+                        <tr>
+                            <th>Bag ID</th>
+                            <th>Blood Type</th>
+                            <th>Volume</th>
+                            <th>Status</th>
+                            <th>Location</th>
+                            <th>Collected</th>
+                            <th>Expires</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><a href="bag_detail.html" class="bag-id">BAG-2024-00847</a></td>
+                            <td><span class="blood-type-badge">O+</span></td>
+                            <td>450mL</td>
+                            <td><span class="status-badge status-available">Available</span></td>
+                            <td><span class="location-cell">Centre Hospitalier - Fridge A</span></td>
+                            <td>May 18, 2026</td>
+                            <td>Jun 18, 2026</td>
+                            <td><div class="action-buttons"><button class="action-btn" onclick="viewBag(847)"><i class="bi bi-eye"></i> View</button><button class="action-btn" onclick="transferBag(847)"><i class="bi bi-arrow-right"></i> Transfer</button></div></td>
+                        </tr>
+                        <tr>
+                            <td><a href="bag_detail.html" class="bag-id">BAG-2024-00846</a></td>
+                            <td><span class="blood-type-badge">A-</span></td>
+                            <td>500mL</td>
+                            <td><span class="status-badge status-in-use">In Use</span></td>
+                            <td><span class="location-cell">Hôpital du Jour - OR 3</span></td>
+                            <td>May 20, 2026</td>
+                            <td>Jun 20, 2026</td>
+                            <td><div class="action-buttons"><button class="action-btn" onclick="viewBag(846)"><i class="bi bi-eye"></i> View</button></div></td>
+                        </tr>
+                        <tr>
+                            <td><a href="bag_detail.html" class="bag-id">BAG-2024-00845</a></td>
+                            <td><span class="blood-type-badge">B+</span></td>
+                            <td>450mL</td>
+                            <td><span class="status-badge status-transit">In Transit</span></td>
+                            <td><span class="location-cell">Route to Clinique de la Vie</span></td>
+                            <td>May 19, 2026</td>
+                            <td class="expiry-soon">Jun 15, 2026</td>
+                            <td><div class="action-buttons"><button class="action-btn" onclick="viewBag(845)"><i class="bi bi-eye"></i> View</button></div></td>
+                        </tr>
+                        <tr>
+                            <td><a href="bag_detail.html" class="bag-id">BAG-2024-00844</a></td>
+                            <td><span class="blood-type-badge">AB+</span></td>
+                            <td>500mL</td>
+                            <td><span class="status-badge status-available">Available</span></td>
+                            <td><span class="location-cell">Centre Médical - Fridge B</span></td>
+                            <td>May 17, 2026</td>
+                            <td>Jun 17, 2026</td>
+                            <td><div class="action-buttons"><button class="action-btn" onclick="viewBag(844)"><i class="bi bi-eye"></i> View</button><button class="action-btn" onclick="transferBag(844)"><i class="bi bi-arrow-right"></i> Transfer</button></div></td>
+                        </tr>
+                        <tr>
+                            <td><a href="bag_detail.html" class="bag-id">BAG-2024-00843</a></td>
+                            <td><span class="blood-type-badge">O-</span></td>
+                            <td>450mL</td>
+                            <td><span class="status-badge status-transit">In Transit</span></td>
+                            <td><span class="location-cell">Route to Hôpital Saint-Paul</span></td>
+                            <td>May 15, 2026</td>
+                            <td class="expiry-soon">Jun 10, 2026</td>
+                            <td><div class="action-buttons"><button class="action-btn" onclick="viewBag(843)"><i class="bi bi-eye"></i> View</button></div></td>
+                        </tr>
+                        <tr>
+                            <td><a href="bag_detail.html" class="bag-id">BAG-2024-00842</a></td>
+                            <td><span class="blood-type-badge">A+</span></td>
+                            <td>500mL</td>
+                            <td><span class="status-badge status-available">Available</span></td>
+                            <td><span class="location-cell">Centre Hospitalier - Fridge A</span></td>
+                            <td>May 16, 2026</td>
+                            <td>Jun 16, 2026</td>
+                            <td><div class="action-buttons"><button class="action-btn" onclick="viewBag(842)"><i class="bi bi-eye"></i> View</button><button class="action-btn" onclick="transferBag(842)"><i class="bi bi-arrow-right"></i> Transfer</button></div></td>
+                        </tr>
+                        <tr>
+                            <td><a href="bag_detail.html" class="bag-id">BAG-2024-00841</a></td>
+                            <td><span class="blood-type-badge">B-</span></td>
+                            <td>450mL</td>
+                            <td><span class="status-badge status-expired">Expired</span></td>
+                            <td><span class="location-cell">Centre Hospitalier - Disposal</span></td>
+                            <td>Apr 15, 2026</td>
+                            <td class="expiry-expired">May 15, 2026</td>
+                            <td><div class="action-buttons"><button class="action-btn" onclick="viewBag(841)"><i class="bi bi-eye"></i> View</button></div></td>
+                        </tr>
+                        <tr>
+                            <td><a href="bag_detail.html" class="bag-id">BAG-2024-00840</a></td>
+                            <td><span class="blood-type-badge">AB-</span></td>
+                            <td>500mL</td>
+                            <td><span class="status-badge status-available">Available</span></td>
+                            <td><span class="location-cell">Clinique de la Vie - Fridge C</span></td>
+                            <td>May 14, 2026</td>
+                            <td>Jun 14, 2026</td>
+                            <td><div class="action-buttons"><button class="action-btn" onclick="viewBag(840)"><i class="bi bi-eye"></i> View</button><button class="action-btn" onclick="transferBag(840)"><i class="bi bi-arrow-right"></i> Transfer</button></div></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Pagination -->
+                <div class="pagination">
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">3</button>
+                    <button class="page-btn">...</button>
+                    <button class="page-btn">12</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function filterBags() {
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('.bags-table tbody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(searchInput)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function filterByStatus(status) {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Filter logic would go here
+            alert(`Filtering by status: ${status}`);
+        }
+
+        function viewBag(id) {
+            alert(`Viewing bag BAG-2024-0${id}`);
+            window.location.href = 'bag_detail.html';
+        }
+
+        function transferBag(id) {
+            alert(`Initiating transfer for bag BAG-2024-0${id}`);
+        }
+    </script>
+</body>
+</html>

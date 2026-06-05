@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Donations — BloodChain</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/static/css/donor.css">
+    <style>
+        .history-controls { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+        .search-box { flex: 1; min-width: 250px; position: relative; }
+        .search-box input { width: 100%; padding: 12px 16px 12px 40px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: var(--white); color: var(--text); }
+        .search-box input:focus { outline: none; border-color: var(--red); box-shadow: 0 0 0 3px rgba(185,28,28,0.1); }
+        .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 16px; }
+        .filter-select { padding: 12px 16px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: var(--white); color: var(--text); cursor: pointer; font-family: 'DM Sans', sans-serif; }
+        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 16px; margin-bottom: 24px; }
+        .stat-box { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; border-left: 4px solid var(--red); }
+        .stat-number { font-size: 28px; font-weight: 600; color: var(--red); margin-bottom: 4px; }
+        .stat-label { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .donation-table { width: 100%; border-collapse: collapse; background: var(--white); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+        .donation-table thead th { background: var(--red-light); padding: 16px; text-align: left; font-weight: 600; color: var(--text); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .donation-table tbody td { padding: 16px; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--text); }
+        .donation-table tbody tr:last-child td { border-bottom: none; }
+        .donation-table tbody tr:hover { background: var(--red-light); }
+        .donation-date { font-weight: 600; color: var(--red); }
+        .hospital-name { font-weight: 500; }
+        .donation-status { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+        .donation-status.completed { background: var(--green-light); color: var(--green); }
+        .donation-status.pending { background: var(--orange-light); color: var(--orange); }
+        .donation-status.failed { background: var(--red-light); color: var(--red); }
+        .donation-amount { font-weight: 600; color: var(--red); }
+        .action-button { padding: 6px 12px; background: var(--red); color: var(--white); border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.3s ease; }
+        .action-button:hover { background: #a01818; }
+        .empty-state { text-align: center; padding: 60px 20px; background: var(--white); border-radius: 12px; border: 1px solid var(--border); }
+        .empty-state-icon { font-size: 48px; color: var(--border); margin-bottom: 16px; }
+        .empty-state h3 { color: var(--text); margin-bottom: 8px; }
+        .empty-state p { color: var(--muted); font-size: 14px; margin-bottom: 20px; }
+        @media (max-width: 768px) { .history-controls { flex-direction: column; } .stats-row { grid-template-columns: repeat(2,1fr); } }
+    </style>
+</head>
+<body>
+<div class="d-flex">
+    <aside class="sidebar">
+        <div class="sidebar-logo"><div class="blood-drop-icon"></div><span>BloodChain</span></div>
+        <nav class="sidebar-nav">
+            <a href="/donor/dashboard/" class="nav-link"><i class="bi bi-house-fill"></i><span>Dashboard</span></a>
+            <a href="/donor/history/" class="nav-link active"><i class="bi bi-heart-pulse"></i><span>My Donations</span></a>
+            <a href="/donor/hospitals/" class="nav-link"><i class="bi bi-hospital"></i><span>Nearby Hospitals</span></a>
+            <a href="/donor/appointments/" class="nav-link"><i class="bi bi-calendar-check"></i><span>Appointments</span></a>
+            <a href="/donor/eligibility/" class="nav-link"><i class="bi bi-shield-check"></i><span>My Eligibility</span></a>
+            <a href="/donor/rewards/" class="nav-link"><i class="bi bi-gift"></i><span>Rewards & Points</span></a>
+            <a href="/donor/alerts/" class="nav-link"><i class="bi bi-exclamation-triangle-fill"></i><span>Emergency Alerts</span></a>
+            <a href="/donor/notifications/" class="nav-link"><i class="bi bi-bell-fill"></i><span>Notifications</span><span class="nav-badge"></span></a>
+            <a href="/donor/profile/" class="nav-link"><i class="bi bi-gear-fill"></i><span>Settings</span></a>
+        </nav>
+        <div class="sidebar-footer"><p>Donor</p><a href="/login/" class="logout-link">Logout</a></div>
+    </aside>
+    <main class="main-content">
+        <header class="topbar">
+            <div class="topbar-left"><h1 class="topbar-title">My Donations</h1></div>
+            <div class="topbar-right">
+                <span class="topbar-date" id="current-date"></span>
+                <div class="topbar-notification"><i class="bi bi-bell-fill"></i><span class="notification-badge"></span></div>
+                <div class="topbar-avatar">D</div>
+            </div>
+        </header>
+        <div class="page-body">
+            <div class="stats-row">
+                <div class="stat-box"><div class="stat-number" id="total-donations">0</div><div class="stat-label">Total Donations</div></div>
+                <div class="stat-box"><div class="stat-number" id="total-volume">0</div><div class="stat-label">Total Volume (mL)</div></div>
+                <div class="stat-box"><div class="stat-number" id="completed-count">0</div><div class="stat-label">Completed</div></div>
+                <div class="stat-box"><div class="stat-number" id="next-eligible">-</div><div class="stat-label">Next Eligible</div></div>
+            </div>
+            <div id="donations-container"><div class="empty-state"><div class="empty-state-icon"><i class="bi bi-inbox"></i></div><h3>No donation history</h3></div></div>
+        </div>
+    </main>
+</div>
+<script src="/static/js/donor-auth.js"></script>
+<script>
+const DONOR_EMAIL = window.BloodChainDonor.requireAuth();
+window.BloodChainDonor.setupShell();
+window.BloodChainDonor.updateNotificationBadges(DONOR_EMAIL);
+
+function loadDonations() {
+    Promise.all([
+        fetch(`/api/tracking/bags/donor/${DONOR_EMAIL}/`).then(r=>r.json()),
+        fetch(`/api/donor/eligibility/${DONOR_EMAIL}/`).then(r=>r.json()).catch(()=>({}))
+    ]).then(([bags, eligibility]) => {
+        const table = document.getElementById('donations-container');
+        if (!bags.length) {
+            table.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><i class="bi bi-inbox"></i></div><h3>No donation history</h3><p>Your completed donations will appear here.</p></div>';
+            return;
+        }
+        document.getElementById('total-donations').textContent = bags.length;
+        const totalVol = bags.reduce((s,b)=>s+(b.volume_ml||450), 0);
+        document.getElementById('total-volume').textContent = totalVol;
+        document.getElementById('completed-count').textContent = bags.filter(b=>b.status==='transfused'||b.status==='stored').length;
+        document.getElementById('next-eligible').textContent = eligibility.next_eligible_date || '-';
+
+        table.innerHTML = `
+            <table class="donation-table">
+                <thead><tr><th>Date</th><th>Hospital</th><th>Type</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody>${bags.map(b => `
+                    <tr>
+                        <td class="donation-date">${new Date(b.collected_at).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</td>
+                        <td class="hospital-name">${b.hospital_name || 'Unknown'}</td>
+                        <td>${b.blood_type}</td>
+                        <td class="donation-amount">${b.volume_ml || 450} mL</td>
+                        <td><span class="donation-status ${b.status === 'transfused' || b.status === 'stored' ? 'completed' : b.status === 'expired' ? 'failed' : 'pending'}">${b.status.charAt(0).toUpperCase()+b.status.slice(1)}</span></td>
+                        <td><button class="action-button" onclick="alert('Bag: ${b.bag_id}')">View</button></td>
+                    </tr>
+                `).join('')}</tbody>
+            </table>`;
+    }).catch(err => console.error('Failed to load donations', err));
+}
+document.addEventListener('DOMContentLoaded', loadDonations);
+</script>
+</body>
+</html>

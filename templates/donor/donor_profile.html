@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile — BloodChain</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/static/css/donor.css">
+</head>
+<body>
+<div class="d-flex">
+    <aside class="sidebar">
+        <div class="sidebar-logo"><div class="blood-drop-icon"></div><span>BloodChain</span></div>
+        <nav class="sidebar-nav">
+            <a href="/donor/dashboard/" class="nav-link"><i class="bi bi-house-fill"></i><span>Dashboard</span></a>
+            <a href="/donor/history/" class="nav-link"><i class="bi bi-heart-pulse"></i><span>My Donations</span></a>
+            <a href="/donor/hospitals/" class="nav-link"><i class="bi bi-hospital"></i><span>Nearby Hospitals</span></a>
+            <a href="/donor/appointments/" class="nav-link"><i class="bi bi-calendar-check"></i><span>Appointments</span></a>
+            <a href="/donor/eligibility/" class="nav-link"><i class="bi bi-shield-check"></i><span>My Eligibility</span></a>
+            <a href="/donor/rewards/" class="nav-link"><i class="bi bi-gift"></i><span>Rewards & Points</span></a>
+            <a href="/donor/alerts/" class="nav-link"><i class="bi bi-exclamation-triangle-fill"></i><span>Emergency Alerts</span></a>
+            <a href="/donor/notifications/" class="nav-link"><i class="bi bi-bell-fill"></i><span>Notifications</span></a>
+            <a href="/donor/profile/" class="nav-link active"><i class="bi bi-gear-fill"></i><span>Settings</span></a>
+        </nav>
+        <div class="sidebar-footer"><p>Donor</p><a href="#" class="logout-link">Logout</a></div>
+    </aside>
+    <main class="main-content">
+        <header class="topbar">
+            <div class="topbar-left"><h1 class="topbar-title">My Profile</h1></div>
+            <div class="topbar-right">
+                <span class="topbar-date" id="current-date"></span>
+                <div class="topbar-avatar" id="avatar">D</div>
+            </div>
+        </header>
+        <div class="page-body">
+            <div id="profile-content"><p>Loading...</p></div>
+        </div>
+    </main>
+</div>
+
+<!-- Success/Error Toast -->
+<div id="toast" style="position:fixed;top:20px;right:20px;z-index:9999;padding:14px 24px;border-radius:8px;color:white;font-weight:500;display:none;box-shadow:0 4px 12px rgba(0,0,0,0.2);"></div>
+
+<script src="/static/js/donor-auth.js"></script>
+<script>
+const DONOR_EMAIL = window.BloodChainDonor.requireAuth();
+window.BloodChainDonor.setupShell();
+
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '\x26amp;',
+        '<': '\x26lt;',
+        '>': '\x26gt;',
+        '"': '\x26quot;',
+        "'": '\x26#39;'
+    }[char]));
+}
+
+function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.background = type === 'error' ? '#d32f2f' : '#2e7d32';
+    t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 3000);
+}
+
+let editing = false;
+let donorData = null;
+
+function loadProfile() {
+    fetch(`/api/donor/profile/${DONOR_EMAIL}/`)
+        .then(r => r.ok ? r.json() : Promise.reject('Not found'))
+        .then(donor => {
+            donorData = donor;
+            renderProfile(false);
+        })
+        .catch(() => {
+            document.getElementById('profile-content').innerHTML = '<p>Profile not found. Please register as a donor first.</p>';
+        });
+}
+
+function renderProfile(isEditing) {
+    editing = isEditing;
+    const d = donorData;
+    const container = document.getElementById('profile-content');
+
+    if (!isEditing) {
+        // === VIEW MODE ===
+        container.innerHTML = `
+            <div style="background:linear-gradient(135deg,var(--red) 0%,#a01818 100%);padding:32px;border-radius:12px;color:white;margin-bottom:24px;">
+                <h2>${escapeHtml(d.full_name)}</h2>
+                <p>${escapeHtml(d.blood_type)} Donor</p>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+                <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:20px;">
+                    <h3>Basic Information</h3>
+                    <p><strong>Email:</strong> ${escapeHtml(d.email)}</p>
+                    <p><strong>Phone:</strong> ${escapeHtml(d.phone_number)}</p>
+                    <p><strong>Blood Type:</strong> ${escapeHtml(d.blood_type)}</p>
+                    <p><strong>Date of Birth:</strong> ${escapeHtml(d.date_of_birth)}</p>
+                    <p><strong>Eligible:</strong> ${d.is_eligible ? 'Yes' : 'No'}</p>
+                    <p><strong>Member Since:</strong> ${new Date(d.created_at).toLocaleDateString()}</p>
+                </div>
+                <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:20px;">
+                    <h3>Account Actions</h3>
+                    <button style="padding:10px 20px;background:var(--red);color:white;border:none;border-radius:6px;cursor:pointer;" onclick="renderProfile(true)">Edit Profile</button>
+                </div>
+            </div>`;
+    } else {
+        // === EDIT MODE ===
+        container.innerHTML = `
+            <div style="background:linear-gradient(135deg,var(--red) 0%,#a01818 100%);padding:32px;border-radius:12px;color:white;margin-bottom:24px;">
+                <h2>Edit Profile</h2>
+                <p>Update your personal information</p>
+            </div>
+            <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:24px;max-width:600px;">
+                <form id="edit-form" onsubmit="return saveProfile(event)">
+                    <div style="margin-bottom:16px;">
+                        <label style="display:block;font-weight:600;margin-bottom:4px;color:#333;">Full Name</label>
+                        <input type="text" name="full_name" value="${escapeHtml(d.full_name)}" required
+                               style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:6px;font-size:14px;">
+                    </div>
+                    <div style="margin-bottom:16px;">
+                        <label style="display:block;font-weight:600;margin-bottom:4px;color:#333;">Phone Number</label>
+                        <input type="text" name="phone_number" value="${escapeHtml(d.phone_number)}" required
+                               style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:6px;font-size:14px;">
+                    </div>
+                    <div style="margin-bottom:16px;">
+                        <label style="display:block;font-weight:600;margin-bottom:4px;color:#333;">Blood Type</label>
+                        <select name="blood_type" required
+                                style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:6px;font-size:14px;background:white;">
+                            ${['A+','A-','B+','B-','AB+','AB-','O+','O-'].map(bt =>
+                                `<option value="${bt}" ${d.blood_type === bt ? 'selected' : ''}>${bt}</option>`
+                            ).join('')}
+                        </select>
+                    </div>
+                    <div style="margin-bottom:16px;">
+                        <label style="display:block;font-weight:600;margin-bottom:4px;color:#333;">Date of Birth</label>
+                        <input type="date" name="date_of_birth" value="${escapeHtml(d.date_of_birth)}" required
+                               style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:6px;font-size:14px;">
+                    </div>
+                    <div style="margin-bottom:16px;display:flex;gap:8px;">
+                        <label style="display:flex;align-items:center;gap:6px;font-weight:500;color:#333;">
+                            <input type="checkbox" name="is_eligible" ${d.is_eligible ? 'checked' : ''}> Eligible to donate
+                        </label>
+                    </div>
+                    <div style="display:flex;gap:12px;margin-top:20px;">
+                        <button type="submit" style="padding:10px 24px;background:var(--red);color:white;border:none;border-radius:6px;cursor:pointer;font-weight:600;">
+                            <i class="bi bi-check-lg"></i> Save Changes
+                        </button>
+                        <button type="button" onclick="renderProfile(false)" style="padding:10px 24px;background:#f5f5f5;color:#333;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-weight:500;">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>`;
+    }
+}
+
+function saveProfile(event) {
+    event.preventDefault();
+    const form = document.getElementById('edit-form');
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+    data.is_eligible = formData.get('is_eligible') === 'on';
+
+    fetch(`/api/donor/profile/${DONOR_EMAIL}/update/`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(r => {
+        if (!r.ok) return r.json().then(err => Promise.reject(err));
+        return r.json();
+    })
+    .then(updated => {
+        donorData = updated;
+        renderProfile(false);
+        showToast('Profile updated successfully!', 'success');
+    })
+    .catch(err => {
+        const msg = typeof err === 'object' && err !== null
+            ? Object.values(err).flat().join(', ')
+            : 'Failed to update profile.';
+        showToast(msg, 'error');
+    });
+
+    return false;
+}
+
+document.addEventListener('DOMContentLoaded', loadProfile);
+</script>
+</body>
+</html>

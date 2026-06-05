@@ -1,0 +1,31 @@
+﻿# Core Django framework and REST API
+Django==4.2.0
+djangorestframework==3.14.0
+
+# Database - PostgreSQL adapter
+psycopg2-binary==2.9.9
+
+# WSGI server for production deployment
+gunicorn==21.2.0
+
+# Caching and message broker - Redis client
+redis==5.0.1
+
+# JWT authentication for token-based auth
+PyJWT==2.12.1
+
+# CORS headers for cross-origin requests
+django-cors-headers==4.3.1
+
+# Ethereum blockchain interaction - Use stable version compatible with Python 3.11
+web3==6.9.0
+django-prometheus==2.5.0
+
+# Environment variable configuration
+python-decouple==3.8
+
+
+django-redis==5.4.0
+
+# API documentation with Swagger/OpenAPI
+drf-yasg==1.21.7

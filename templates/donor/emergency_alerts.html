@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Alerts - BloodChain Donor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/static/css/donor.css">
+    <style>
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+        .empty-state-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 16px; margin-bottom: 24px; }
+        .stat-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; border-left: 4px solid var(--red); }
+        .stat-value { font-size: 28px; font-weight: 600; color: var(--red); margin-bottom: 4px; }
+        .stat-label { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2,1fr); } }
+        @media (max-width: 480px) { .stats-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+<div class="d-flex">
+    <aside class="sidebar">
+        <div class="sidebar-logo"><div class="blood-drop-icon"></div><span>BloodChain</span></div>
+        <nav class="sidebar-nav">
+            <a href="/donor/dashboard/" class="nav-link"><i class="bi bi-house-fill"></i><span>Dashboard</span></a>
+            <a href="/donor/history/" class="nav-link"><i class="bi bi-heart-pulse"></i><span>My Donations</span></a>
+            <a href="/donor/hospitals/" class="nav-link"><i class="bi bi-hospital"></i><span>Nearby Hospitals</span></a>
+            <a href="/donor/appointments/" class="nav-link"><i class="bi bi-calendar-check"></i><span>Appointments</span></a>
+            <a href="/donor/eligibility/" class="nav-link"><i class="bi bi-shield-check"></i><span>My Eligibility</span></a>
+            <a href="/donor/rewards/" class="nav-link"><i class="bi bi-gift"></i><span>Rewards & Points</span></a>
+            <a href="/donor/alerts/" class="nav-link active"><i class="bi bi-exclamation-triangle-fill"></i><span>Emergency Alerts</span></a>
+            <a href="/donor/notifications/" class="nav-link"><i class="bi bi-bell-fill"></i><span>Notifications</span><span class="nav-badge">0</span></a>
+            <a href="/donor/profile/" class="nav-link"><i class="bi bi-gear-fill"></i><span>Settings</span></a>
+        </nav>
+        <div class="sidebar-footer"><p>Donor</p><a href="/login/" class="logout-link">Logout</a></div>
+    </aside>
+    <div class="main-content">
+        <div class="topbar">
+            <div class="topbar-left"><div class="topbar-title">Emergency Alerts</div><div class="topbar-date" id="current-date"></div></div>
+            <div class="topbar-right"><i class="bi bi-bell-fill" style="color:var(--red);font-size:18px;"></i></div>
+        </div>
+        <div class="page-body">
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-label">Active Emergencies</div><div class="stat-value" id="active-emergencies">0</div></div>
+                <div class="stat-card"><div class="stat-label">Matches Your Blood</div><div class="stat-value" id="blood-matches">0</div></div>
+            </div>
+            <div id="alerts-container"><div class="empty-state"><div class="empty-state-icon"><i class="bi bi-check-circle"></i></div><p>No active emergency alerts at this time</p></div></div>
+        </div>
+    </div>
+</div>
+<script src="/static/js/donor-auth.js"></script>
+<script>
+const DONOR_EMAIL = window.BloodChainDonor.requireAuth();
+window.BloodChainDonor.setupShell();
+window.BloodChainDonor.updateNotificationBadges(DONOR_EMAIL);
+
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    }[char]));
+}
+
+function loadAlerts() {
+    fetch('/api/notifications/list/')
+        .then(r=>r.json())
+        .then(data => {
+            const emergencies = data.filter(n => n.is_emergency);
+            document.getElementById('active-emergencies').textContent = emergencies.length;
+
+            const container = document.getElementById('alerts-container');
+            if (!emergencies.length) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><i class="bi bi-check-circle"></i></div><p>No active emergency alerts at this time</p></div>';
+                return;
+            }
+            container.innerHTML = emergencies.map(n => `
+                <div class="emergency-alert" style="background:linear-gradient(135deg,#FEE2E2 0%,#FECACA 100%);border:2px solid var(--red);border-radius:12px;padding:20px;margin-bottom:16px;">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <div style="width:40px;height:40px;background:var(--red);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;"><i class="bi bi-exclamation-lg"></i></div>
+                            <div><h3 style="margin:0;font-weight:700;">Emergency Alert</h3></div>
+                        </div>
+                    </div>
+                    <p><strong>Hospital:</strong> ${escapeHtml(n.hospital_name)}<br><strong>Blood Type:</strong> ${escapeHtml(n.blood_type_needed)}<br><strong>Message:</strong> ${escapeHtml(n.message)}</p>
+                    <p style="color:var(--muted);font-size:12px;">${new Date(n.created_at).toLocaleString()}</p>
+                </div>
+            `).join('');
+        })
+        .catch(err => console.error('Failed to load alerts', err));
+}
+document.addEventListener('DOMContentLoaded', loadAlerts);
+</script>
+</body>
+</html>

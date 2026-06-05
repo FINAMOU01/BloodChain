@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donors Nearby — BloodChain</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css">
+    <link rel="stylesheet" href="/static/css/hospital.css">
+    <style>
+        .map-container { width: 100%; background: #f0f0f0; border-radius: 12px; border: 2px solid var(--border); margin-bottom: 24px; }
+        .filters-bar { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; background: var(--white); padding: 20px; border-radius: 12px; border: 1px solid var(--border); }
+        .filter-group { display: flex; align-items: center; gap: 8px; }
+        .filter-label { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .filter-select { padding: 10px 14px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; background: var(--white); color: var(--text); font-family: 'DM Sans', sans-serif; }
+        .donor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .donor-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+        .donor-card:hover { box-shadow: 0 8px 24px rgba(185, 28, 28, 0.15); transform: translateY(-4px); border-color: var(--red); }
+        .donor-card-header { background: linear-gradient(135deg, var(--red) 0%, #a01818 100%); padding: 20px; color: var(--white); display: flex; align-items: center; gap: 16px; }
+        .donor-avatar { width: 60px; height: 60px; background: rgba(255, 255, 255, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 600; border: 2px solid rgba(255, 255, 255, 0.3); }
+        .donor-name { font-size: 16px; font-weight: 600; }
+        .donor-card-body { padding: 20px; flex: 1; gap: 12px; display: flex; flex-direction: column; }
+        .donor-info-row { display: flex; justify-content: space-between; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+        .donor-info-label { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+        .donor-info-value { font-size: 14px; font-weight: 600; color: var(--text); }
+        .blood-type-badge { display: inline-block; padding: 6px 12px; background: var(--red-light); color: var(--red); border-radius: 6px; font-weight: 600; font-size: 12px; }
+        .eligibility-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+        .eligibility-badge.eligible { background: var(--green-light); color: var(--green); }
+        .eligibility-badge.not-eligible { background: var(--red-light); color: var(--red); }
+        .donor-card-footer { padding: 16px 20px; border-top: 1px solid var(--border); display: flex; gap: 12px; }
+        .btn-small { flex: 1; padding: 10px 16px; border: none; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .btn-small.primary { background: var(--red); color: var(--white); }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .stat-box { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; }
+        .stat-number { font-size: 32px; font-weight: 600; color: var(--red); margin-bottom: 4px; }
+        .stat-label { font-size: 13px; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+    <div class="d-flex">
+        <aside class="sidebar">
+            <div class="sidebar-logo"><div class="blood-drop-icon"></div><span>BloodChain</span></div>
+            <nav class="sidebar-nav">
+                <a href="/hospital/dashboard/" class="nav-link"><i class="bi bi-house-fill"></i><span>Dashboard</span></a>
+                <a href="/hospital/stock/" class="nav-link"><i class="bi bi-capsule"></i><span>Blood Stock</span></a>
+                <a href="/hospital/requests/" class="nav-link"><i class="bi bi-exclamation-triangle-fill"></i><span>Request Blood</span></a>
+                <a href="/hospital/donors/" class="nav-link active"><i class="bi bi-people-fill"></i><span>Donors Nearby</span></a>
+                <a href="/hospital/notifications/" class="nav-link"><i class="bi bi-bell-fill"></i><span>Notifications</span><span class="nav-badge" id="nav-badge"></span></a>
+                <a href="/hospital/alerts/create/" class="nav-link"><i class="bi bi-exclamation-triangle-fill"></i><span>Emergency Alerts</span></a>
+                <a href="/hospital/profile/" class="nav-link"><i class="bi bi-gear-fill"></i><span>Settings</span></a>
+            </nav>
+            <div class="sidebar-footer"><p>Hospital</p><a href="#" class="logout-link" id="logout-link">Logout</a></div>
+        </aside>
+        <main class="main-content">
+            <header class="topbar">
+                <div class="topbar-left"><h1 class="topbar-title">Donors Nearby</h1></div>
+                <div class="topbar-right">
+                    <span class="topbar-date" id="current-date"></span>
+                    <div class="topbar-notification"><i class="bi bi-bell-fill"></i><span class="notification-badge" id="topbar-badge"></span></div>
+                    <div class="topbar-avatar" id="avatar">H</div>
+                </div>
+            </header>
+            <div class="page-body">
+                <div class="stats-grid">
+                    <div class="stat-box"><div class="stat-number" id="stat-total">0</div><div class="stat-label">Donors Available</div></div>
+                    <div class="stat-box"><div class="stat-number" id="stat-eligible">0</div><div class="stat-label">Eligible to Donate</div></div>
+                    <div class="stat-box"><div class="stat-number" id="stat-blood-types">0</div><div class="stat-label">Blood Types</div></div>
+                </div>
+                <div id="donor-map" class="map-container" style="height: 500px;"></div>
+                <div class="filters-bar">
+                    <div class="filter-group">
+                        <label class="filter-label">Blood Type</label>
+                        <select class="filter-select" id="filter-blood-type" onchange="loadDonors()">
+                            <option value="">All Types</option>
+                            <option value="O+">O+</option><option value="O-">O-</option><option value="A+">A+</option><option value="A-">A-</option>
+                            <option value="B+">B+</option><option value="B-">B-</option><option value="AB+">AB+</option><option value="AB-">AB-</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Status</label>
+                        <select class="filter-select" id="filter-status" onchange="loadDonors()">
+                            <option value="">All</option>
+                            <option value="true">Eligible Only</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="donor-grid" id="donor-grid"><p style="color: var(--muted); padding: 20px; text-align: center; width: 100%;">Loading donors...</p></div>
+            </div>
+        </main>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
+    <script>
+        const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
+        const HOSPITAL_EMAIL = localStorage.getItem('hospital_email') || storedUser?.email;
+        if (!localStorage.getItem('token') || !HOSPITAL_EMAIL) { window.location.replace('/login/'); }
+
+        let map = null, donorMarkers = [];
+
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+        document.getElementById('logout-link').addEventListener('click', function(e) {
+            e.preventDefault();
+            localStorage.removeItem('token'); localStorage.removeItem('user');
+            localStorage.removeItem('donor_email'); localStorage.removeItem('hospital_email');
+            window.location.replace('/login/');
+        });
+
+        async function loadDonors() {
+            const bt = document.getElementById('filter-blood-type').value;
+            const el = document.getElementById('filter-status').value;
+            let url = '/api/donor/list/';
+            const params = new URLSearchParams();
+            if (bt) params.set('blood_type', bt);
+            if (el) params.set('eligible', el);
+            if (params.toString()) url += '?' + params.toString();
+            try {
+                const res = await fetch(url);
+                const [notifsRes] = await Promise.all([fetch('/api/notifications/list/')]);
+                const notifs = notifsRes.ok ? await notifsRes.json() : [];
+                document.getElementById('nav-badge').textContent = notifs.filter(n=>!n.is_sent).length || '';
+                document.getElementById('topbar-badge').textContent = notifs.filter(n=>!n.is_sent).length || '';
+                if (!res.ok) throw new Error('Failed');
+                const donors = await res.json();
+                document.getElementById('stat-total').textContent = donors.length;
+                document.getElementById('stat-eligible').textContent = donors.filter(d => d.is_eligible).length;
+                document.getElementById('stat-blood-types').textContent = [...new Set(donors.map(d=>d.blood_type))].length;
+                const grid = document.getElementById('donor-grid');
+                if (donors.length === 0) { grid.innerHTML = '<p style="color:var(--muted);padding:40px;text-align:center;">No donors found</p>'; return; }
+                grid.innerHTML = donors.map(d => `
+                    <div class="donor-card">
+                        <div class="donor-card-header">
+                            <div class="donor-avatar">${(d.full_name||'?').charAt(0)}</div>
+                            <div><div class="donor-name">${d.full_name||d.email}</div><div>${d.phone_number||''}</div></div>
+                        </div>
+                        <div class="donor-card-body">
+                            <div class="donor-info-row"><span class="donor-info-label">Blood Type</span><span class="blood-type-badge">${d.blood_type||'N/A'}</span></div>
+                            <div class="donor-info-row"><span class="donor-info-label">Status</span><span class="eligibility-badge ${d.is_eligible?'eligible':'not-eligible'}">${d.is_eligible?'Eligible':'Not Eligible'}</span></div>
+                        </div>
+                        <div class="donor-card-footer"><button class="btn-small primary" onclick="alert('Contact: ${d.phone_number||'N/A'}')"><i class="bi bi-phone-fill"></i> Contact</button></div>
+                    </div>`).join('');
+                if (map) { donorMarkers.forEach(m=>map.removeLayer(m)); donorMarkers=[]; donors.forEach((d,i)=>{const m=L.marker([3.8667+(Math.random()-0.5)*0.05,11.5167+(Math.random()-0.5)*0.05]).addTo(map).bindPopup(`<b>${d.full_name||d.email}</b><br>Blood: ${d.blood_type||'N/A'}`);donorMarkers.push(m);});}
+            } catch(e) { document.getElementById('donor-grid').innerHTML = '<p style="color:var(--muted);padding:20px;">Failed to load donors.</p>'; }
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            map = L.map('donor-map').setView([3.8667,11.5167],13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'©OSM'}).addTo(map);
+            L.marker([3.8667,11.5167]).addTo(map).bindPopup('<b>Your Hospital</b>');
+            loadDonors();
+        });
+    </script>
+</body>
+</html>

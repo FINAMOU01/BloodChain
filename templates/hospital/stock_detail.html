@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blood Stock Details — BloodChain</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/static/css/hospital.css">
+    <style>
+        .stock-container { display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px;margin-bottom:24px; }
+        .stock-card { background:var(--white);border:1px solid var(--border);border-radius:12px;padding:24px;position:relative;overflow:hidden; }
+        .stock-card::before { content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--red); }
+        .stock-quantity { font-size:32px;font-weight:600;color:var(--text); }
+        .stock-unit { font-size:12px;color:var(--muted); }
+        .stock-status { display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border); }
+        .inventory-table { width:100%;border-collapse:collapse;background:var(--white);border-radius:12px;overflow:hidden;border:1px solid var(--border); }
+        .inventory-table th { background:var(--red-light);padding:16px;text-align:left;font-weight:600;font-size:12px;text-transform:uppercase; }
+        .inventory-table td { padding:16px;border-bottom:1px solid var(--border);font-size:14px; }
+        .blood-type-badge { display:inline-block;padding:6px 12px;background:var(--red-light);color:var(--red);border-radius:6px;font-weight:600;font-size:12px; }
+        .qty-badge { padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600; }
+        .qty-badge.ok { background:var(--green-light);color:var(--green); }
+        .qty-badge.low { background:var(--orange-light);color:var(--orange); }
+        .qty-badge.critical { background:var(--red-light);color:var(--red); }
+    </style>
+</head>
+<body>
+    <div class="d-flex">
+        <aside class="sidebar">
+            <div class="sidebar-logo"><div class="blood-drop-icon"></div><span>BloodChain</span></div>
+            <nav class="sidebar-nav">
+                <a href="/hospital/dashboard/" class="nav-link"><i class="bi bi-house-fill"></i><span>Dashboard</span></a>
+                <a href="/hospital/stock/" class="nav-link active"><i class="bi bi-capsule"></i><span>Blood Stock</span></a>
+                <a href="/hospital/requests/" class="nav-link"><i class="bi bi-exclamation-triangle-fill"></i><span>Request Blood</span></a>
+                <a href="/hospital/donors/" class="nav-link"><i class="bi bi-people-fill"></i><span>Donors Nearby</span></a>
+                <a href="/hospital/notifications/" class="nav-link"><i class="bi bi-bell-fill"></i><span>Notifications</span><span class="nav-badge" id="nav-badge"></span></a>
+                <a href="/hospital/alerts/create/" class="nav-link"><i class="bi bi-exclamation-triangle-fill"></i><span>Emergency Alerts</span></a>
+                <a href="/hospital/profile/" class="nav-link"><i class="bi bi-gear-fill"></i><span>Settings</span></a>
+            </nav>
+            <div class="sidebar-footer"><p>Hospital</p><a href="#" class="logout-link" id="logout-link">Logout</a></div>
+        </aside>
+        <main class="main-content">
+            <header class="topbar">
+                <div class="topbar-left"><h1 class="topbar-title">Blood Stock Details</h1></div>
+                <div class="topbar-right">
+                    <span class="topbar-date" id="current-date"></span>
+                    <div class="topbar-notification"><i class="bi bi-bell-fill"></i><span class="notification-badge" id="topbar-badge"></span></div>
+                    <div class="topbar-avatar" id="avatar">H</div>
+                </div>
+            </header>
+            <div class="page-body">
+                <div class="stock-container" id="stock-summary">
+                    <p style="color:var(--muted);">Loading stock...</p>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table class="inventory-table">
+                        <thead><tr><th>Blood Type</th><th>Units</th><th>Status</th><th>Last Updated</th><th>Action</th></tr></thead>
+                        <tbody id="stock-table-body"><tr><td colspan="5" style="text-align:center;color:var(--muted);">Loading...</td></tr></tbody>
+                    </table>
+                </div>
+                <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:24px;">
+                    <a href="/hospital/dashboard/" style="padding:12px 24px;background:var(--border);color:var(--text);border-radius:8px;text-decoration:none;font-weight:600;">Back</a>
+                    <a href="/hospital/stock/update/" style="padding:12px 24px;background:var(--red);color:white;border-radius:8px;text-decoration:none;font-weight:600;">Update Stock</a>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script>
+        const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
+        const HOSPITAL_EMAIL = localStorage.getItem('hospital_email') || storedUser?.email;
+
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+        document.getElementById('logout-link').addEventListener('click', function(e) {
+            e.preventDefault();
+            localStorage.removeItem('token'); localStorage.removeItem('hospital_email');
+            window.location.replace('/login/');
+        });
+
+        function qtyClass(units) { if (units >= 10) return 'ok'; if (units >= 5) return 'low'; return 'critical'; }
+        function qtyLabel(units) { if (units >= 10) return 'Available'; if (units >= 5) return 'Low'; return 'Critical'; }
+
+        async function loadStock() {
+            try {
+                const [res, notifsRes] = await Promise.all([
+                    fetch('/api/hospital/stock/1/'),
+                    fetch('/api/notifications/list/')
+                ]);
+                const notifs = notifsRes.ok ? await notifsRes.json() : [];
+                const notifCount = notifs.filter(n=>!n.is_sent).length;
+                document.getElementById('nav-badge').textContent = notifCount || '';
+                document.getElementById('topbar-badge').textContent = notifCount || '';
+
+                if (!res.ok) throw new Error('Failed');
+                const stock = await res.json();
+
+                const total = stock.reduce((s, item) => s + item.units_available, 0);
+                const low = stock.filter(s => s.units_available < 5).length;
+                const categories = stock.length;
+
+                document.getElementById('stock-summary').innerHTML = `
+                    <div class="stock-card"><div class="stock-quantity">${total}</div><div class="stock-unit">Total Units</div><div class="stock-status"><span style="width:8px;height:8px;border-radius:50%;background:var(--green);"></span><span style="font-size:12px;color:var(--muted);">In inventory</span></div></div>
+                    <div class="stock-card"><div class="stock-quantity">${categories}</div><div class="stock-unit">Blood Types</div><div class="stock-status"><span style="width:8px;height:8px;border-radius:50%;background:var(--green);"></span><span style="font-size:12px;color:var(--muted);">Categories</span></div></div>
+                    <div class="stock-card"><div class="stock-quantity">${low}</div><div class="stock-unit">Low / Critical</div><div class="stock-status"><span style="width:8px;height:8px;border-radius:50%;background:${low > 0 ? 'var(--orange)' : 'var(--green)'};"></span><span style="font-size:12px;color:var(--muted);">${low > 0 ? 'Needs attention' : 'All good'}</span></div></div>
+                    <div class="stock-card"><div class="stock-quantity">${stock.length ? stock[0].last_updated ? new Date(stock[0].last_updated).toLocaleDateString() : '-' : '-'}</div><div class="stock-unit">Last Updated</div><div class="stock-status"><span style="width:8px;height:8px;border-radius:50%;background:var(--green);"></span><span style="font-size:12px;color:var(--muted);">Current</span></div></div>
+                `;
+
+                document.getElementById('stock-table-body').innerHTML = stock.map(s => `
+                    <tr>
+                        <td><span class="blood-type-badge">${s.blood_type}</span></td>
+                        <td>${s.units_available}L</td>
+                        <td><span class="qty-badge ${qtyClass(s.units_available)}">${qtyLabel(s.units_available)}</span></td>
+                        <td>${s.last_updated ? new Date(s.last_updated).toLocaleDateString() : '-'}</td>
+                        <td><a href="/hospital/stock/update/" style="color:var(--red);text-decoration:none;font-weight:600;">Update</a></td>
+                    </tr>
+                `).join('');
+            } catch(e) {
+                document.getElementById('stock-summary').innerHTML = '<p style="color:var(--muted);">Could not load stock data.</p>';
+                document.getElementById('stock-table-body').innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);">Failed to load</td></tr>';
+            }
+        }
+        document.addEventListener('DOMContentLoaded', loadStock);
+    </script>
+</body>
+</html>

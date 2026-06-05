@@ -9,7 +9,7 @@ This Nginx configuration routes requests to the different backend microservices.
 |----------|-------|------|
 | Frontend | / | 8000 |
 | User Management | /api/users/ | 8001 |
-| Donor Service | /api/donors/ | 8002 |
+| Donor Service | /api/donor/ | 8002 |
 | Hospital Service | /api/hospitals/ | 8003 |
 | Blood Tracking | /api/tracking/ | 8004 |
 | Notifications | /api/notifications/ | 8005 |

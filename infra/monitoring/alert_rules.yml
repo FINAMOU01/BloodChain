@@ -1,0 +1,38 @@
+groups:
+  - name: bloodchain-alerts
+    rules:
+      - alert: BloodChainServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service is down"
+          description: "The BloodChain service has been down for more than 1 minute."
+
+      - alert: HighAPIResponseTime
+        expr: bloodchain_api_response_seconds_bucket > 2
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "API response time is high"
+          description: "API response time has exceeded 2 seconds for more than 2 minutes."
+
+      - alert: HighDonorRegistrationFailures
+        expr: rate(bloodchain_donor_registrations_total[5m]) <= 0
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "No new donor registrations"
+          description: "No new donor registrations in the last 10 minutes."
+
+      - alert: EmergencyAlertBacklog
+        expr: bloodchain_emergency_alerts_total > 100
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Emergency alert backlog"
+          description: "More than 100 emergency alerts queued."

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Blood — BloodChain</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/static/css/hospital.css">
+    <style>
+        #toast { position:fixed;top:20px;right:20px;z-index:9999;padding:14px 24px;border-radius:8px;color:white;font-weight:500;display:none;}
+    </style>
+</head>
+<body>
+    <div class="d-flex">
+        <aside class="sidebar">
+            <div class="sidebar-logo"><div class="blood-drop-icon"></div><span>BloodChain</span></div>
+            <nav class="sidebar-nav">
+                <a href="/hospital/dashboard/" class="nav-link"><i class="bi bi-house-fill"></i><span>Dashboard</span></a>
+                <a href="/hospital/stock/" class="nav-link"><i class="bi bi-capsule"></i><span>Blood Stock</span></a>
+                <a href="/hospital/request/new/" class="nav-link active"><i class="bi bi-exclamation-triangle-fill"></i><span>Request Blood</span></a>
+                <a href="/hospital/donors/" class="nav-link"><i class="bi bi-people-fill"></i><span>Donors Nearby</span></a>
+                <a href="/hospital/notifications/" class="nav-link"><i class="bi bi-bell-fill"></i><span>Notifications</span><span class="nav-badge" id="nav-badge"></span></a>
+                <a href="/hospital/alerts/create/" class="nav-link"><i class="bi bi-exclamation-triangle-fill"></i><span>Emergency Alerts</span></a>
+                <a href="/hospital/profile/" class="nav-link"><i class="bi bi-gear-fill"></i><span>Settings</span></a>
+            </nav>
+            <div class="sidebar-footer"><p>Hospital</p><a href="#" class="logout-link" id="logout-link">Logout</a></div>
+        </aside>
+        <main class="main-content">
+            <header class="topbar">
+                <div class="topbar-left"><h1 class="topbar-title">Request Blood</h1></div>
+                <div class="topbar-right">
+                    <span class="topbar-date" id="current-date"></span>
+                    <div class="topbar-notification"><i class="bi bi-bell-fill"></i><span class="notification-badge" id="topbar-badge"></span></div>
+                    <div class="topbar-avatar" id="avatar">H</div>
+                </div>
+            </header>
+            <div class="page-body">
+                <div class="request-form-container">
+                    <div class="form-card">
+                        <div class="form-card-header">
+                            <div class="form-header-content">
+                                <h2 class="form-title">Submit Blood Request</h2>
+                                <p class="form-subtitle">Fill in the details below to request blood units for your hospital</p>
+                            </div>
+                        </div>
+                        <form class="blood-request-form" id="request-form">
+                            <div class="form-section">
+                                <h3 class="section-title">Blood Type Required</h3>
+                                <div class="blood-type-grid">
+                                    <label class="blood-type-option"><input type="radio" name="blood_type" value="O-" required><span class="blood-type-label">O-</span></label>
+                                    <label class="blood-type-option"><input type="radio" name="blood_type" value="O+"><span class="blood-type-label">O+</span></label>
+                                    <label class="blood-type-option"><input type="radio" name="blood_type" value="A+"><span class="blood-type-label">A+</span></label>
+                                    <label class="blood-type-option"><input type="radio" name="blood_type" value="A-"><span class="blood-type-label">A-</span></label>
+                                    <label class="blood-type-option"><input type="radio" name="blood_type" value="B+"><span class="blood-type-label">B+</span></label>
+                                    <label class="blood-type-option"><input type="radio" name="blood_type" value="B-"><span class="blood-type-label">B-</span></label>
+                                    <label class="blood-type-option"><input type="radio" name="blood_type" value="AB+"><span class="blood-type-label">AB+</span></label>
+                                    <label class="blood-type-option"><input type="radio" name="blood_type" value="AB-"><span class="blood-type-label">AB-</span></label>
+                                </div>
+                            </div>
+                            <div class="form-section">
+                                <h3 class="section-title">Request Details</h3>
+                                <div class="form-grid-2">
+                                    <div class="form-group">
+                                        <label for="units_needed"><i class="bi bi-droplet-fill"></i> Units Required</label>
+                                        <input type="number" id="units_needed" name="units_needed" min="1" max="100" placeholder="e.g., 5" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="hospital_id">Hospital ID</label>
+                                        <input type="number" id="hospital_id" name="hospital" placeholder="e.g., 1" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <a href="/hospital/dashboard/" class="btn-secondary" style="padding:12px 28px;border-radius:8px;text-decoration:none;background:var(--border);color:var(--text);font-weight:600;"><i class="bi bi-arrow-left"></i> Back</a>
+                                <button type="submit" class="btn-submit"><i class="bi bi-check-circle"></i> Submit Request</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <div id="toast"></div>
+    <script>
+        const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
+        const HOSPITAL_EMAIL = localStorage.getItem('hospital_email') || storedUser?.email;
+
+        function showToast(msg, type) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.style.background = type === 'error' ? '#d32f2f' : '#2e7d32';
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 3000);
+        }
+
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+        document.getElementById('logout-link').addEventListener('click', function(e) {
+            e.preventDefault();
+            localStorage.removeItem('token'); localStorage.removeItem('hospital_email');
+            window.location.replace('/login/');
+        });
+
+        document.getElementById('request-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const data = {
+                blood_type: formData.get('blood_type'),
+                units_needed: parseInt(formData.get('units_needed')),
+                hospital: parseInt(formData.get('hospital'))
+            };
+
+            if (!data.blood_type) { showToast('Please select a blood type', 'error'); return; }
+
+            try {
+                const res = await fetch('/api/hospital/request/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (!res.ok) { const err = await res.json(); throw new Error(Object.values(err).flat().join(', ')); }
+                showToast('Blood request submitted successfully!', 'success');
+                this.reset();
+            } catch(e) {
+                showToast('Error: ' + e.message, 'error');
+            }
+        });
+    </script>
+</body>
+</html>

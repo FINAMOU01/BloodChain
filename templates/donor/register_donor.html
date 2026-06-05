@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donor Registration - BloodChain</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="../../static/css/donor.css">
+</head>
+<body>
+    <div class="donor-register-container">
+        <!-- LEFT PANEL -->
+        <div class="left-panel">
+            <a href="../../index.html" class="left-brand">
+                <div class="blood-drop-white"></div>
+                BloodChain
+            </a>
+
+            <div class="left-content">
+                <div>
+                    <div class="left-badge">
+                        <i class="bi bi-heart-fill"></i>
+                        Donor Registration
+                    </div>
+                    <h1 class="left-heading">
+                        <span class="italic">Be the reason</span><br>
+                        someone sees<br>
+                        tomorrow.
+                    </h1>
+                    <p class="left-description">
+                        Every donation you make saves up to 3 lives. Join thousands of donors who are making a real difference in their communities.
+                    </p>
+                    <ul class="left-perks">
+                        <li>
+                            <i class="bi bi-geo-alt-fill"></i>
+                            <span>Get matched with urgent requests near you</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-bell-fill"></i>
+                            <span>Real-time notifications when help is needed</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-shield-check"></i>
+                            <span>Safe, verified, and fully compliant</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <a href="../hospital/register_hospital.html" class="left-footer-link">
+                    Registering a hospital instead? Register as Hospital →
+                </a>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div class="right-panel">
+            <div class="form-header">
+                <h2 class="form-title">Create your account</h2>
+                <p class="form-subtitle">Join our network of life-saving donors today</p>
+                <div class="form-divider"></div>
+            </div>
+
+            <form class="donor-form" id="donorForm">
+                <!-- First Name & Last Name -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName">
+                            <i class="bi bi-person"></i>
+                            First Name
+                        </label>
+                        <div class="form-input-wrapper">
+                            <i class="form-input-icon bi bi-person"></i>
+                            <input type="text" id="firstName" class="form-input" placeholder="John" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">
+                            <i class="bi bi-person"></i>
+                            Last Name
+                        </label>
+                        <div class="form-input-wrapper">
+                            <i class="form-input-icon bi bi-person"></i>
+                            <input type="text" id="lastName" class="form-input" placeholder="Doe" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="form-row full">
+                    <div class="form-group">
+                        <label for="email">
+                            <i class="bi bi-envelope"></i>
+                            Email Address
+                        </label>
+                        <div class="form-input-wrapper">
+                            <i class="form-input-icon bi bi-envelope"></i>
+                            <input type="email" id="email" class="form-input" placeholder="john@example.com" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phone & Blood Type -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="phone">
+                            <i class="bi bi-telephone"></i>
+                            Phone Number
+                        </label>
+                        <div class="form-input-wrapper">
+                            <i class="form-input-icon bi bi-telephone"></i>
+                            <input type="tel" id="phone" class="form-input" placeholder="+237 6XX XXX XXX" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="bloodType">
+                            <i class="bi bi-droplet-fill"></i>
+                            Blood Type
+                        </label>
+                        <div class="form-input-wrapper">
+                            <i class="form-input-icon bi bi-droplet-fill"></i>
+                            <select id="bloodType" class="form-select" required>
+                                <option value="">Select blood type</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- City -->
+                <div class="form-row full">
+                    <div class="form-group">
+                        <label for="city">
+                            <i class="bi bi-geo-alt"></i>
+                            City
+                        </label>
+                        <div class="form-input-wrapper">
+                            <i class="form-input-icon bi bi-geo-alt"></i>
+                            <input type="text" id="city" class="form-input" placeholder="Yaounde" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Date of Birth -->
+                <div class="form-row full">
+                    <div class="form-group">
+                        <label for="dateOfBirth">
+                            <i class="bi bi-calendar"></i>
+                            Date of Birth
+                        </label>
+                        <div class="form-input-wrapper">
+                            <i class="form-input-icon bi bi-calendar"></i>
+                            <input type="date" id="dateOfBirth" class="form-input" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Password & Confirm Password -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="password">
+                            <i class="bi bi-lock"></i>
+                            Password
+                        </label>
+                        <div class="form-input-wrapper">
+                            <i class="form-input-icon bi bi-lock"></i>
+                            <input type="password" id="password" class="form-input" placeholder="Enter a strong password" required>
+                            <button type="button" class="form-password-toggle" onclick="togglePassword('password')">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">
+                            <i class="bi bi-lock"></i>
+                            Confirm Password
+                        </label>
+                        <div class="form-input-wrapper">
+                            <i class="form-input-icon bi bi-lock"></i>
+                            <input type="password" id="confirmPassword" class="form-input" placeholder="Confirm your password" required>
+                            <button type="button" class="form-password-toggle" onclick="togglePassword('confirmPassword')">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="form-submit">
+                    <i class="bi bi-heart-fill"></i>
+                    Register as Donor
+                </button>
+
+                <!-- Sign In Link -->
+                <div class="form-divider-line"></div>
+                <div class="form-signin">
+                    Already have an account? <a href="/login/">Sign in to your account →</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function getErrorMessage(data, fallback) {
+            if (!data || typeof data !== 'object') {
+                return fallback;
+            }
+
+            if (data.error) {
+                return data.error;
+            }
+
+            const firstError = Object.values(data)[0];
+            if (Array.isArray(firstError)) {
+                return firstError[0];
+            }
+
+            if (typeof firstError === 'string') {
+                return firstError;
+            }
+
+            return fallback;
+        }
+
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const button = event.target.closest('button');
+            const icon = button.querySelector('i');
+
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                field.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        }
+
+        document.getElementById('donorForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const bloodType = document.getElementById('bloodType').value;
+            const city = document.getElementById('city').value;
+            const dateOfBirth = document.getElementById('dateOfBirth').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+
+            if (password !== confirmPassword) {
+                alert('Passwords do not match!');
+                return;
+            }
+
+            if (!dateOfBirth) {
+                alert('Please enter your date of birth.');
+                return;
+            }
+
+            // Set loading state
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span>Registering...</span>';
+
+            try {
+                // 1) Register in user-management (auth)
+                const response = await fetch('/api/users/api/auth/register/', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        email,
+                        password,
+                        password_confirm: confirmPassword,
+                        first_name: firstName,
+                        last_name: lastName,
+                        role: 'donor'
+                    })
+                });
+                const data = await response.json().catch(() => ({}));
+                if (response.ok) {
+                    // 2) Create Donor record in donor-service
+                    const donorResponse = await fetch('/api/donor/register/', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            full_name: firstName + ' ' + lastName,
+                            email: email,
+                            phone_number: phone,
+                            blood_type: bloodType,
+                            date_of_birth: dateOfBirth
+                        })
+                    });
+                    const donorData = await donorResponse.json().catch(() => ({}));
+                    if (!donorResponse.ok) {
+                        throw new Error(getErrorMessage(donorData, 'Donor profile creation failed'));
+                    }
+
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem('donor_email', email);
+
+                    alert('Registration successful!');
+                    window.location.href = '/donor/dashboard/';
+                } else {
+                    const errorMsg = getErrorMessage(data, 'Registration failed');
+                    alert(errorMsg);
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+            } catch(err) {
+                alert('Registration error: ' + err.message);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+    </script>
+</body>
+</html>

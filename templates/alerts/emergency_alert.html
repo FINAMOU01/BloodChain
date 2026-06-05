@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Alerts - BloodChain</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Hospital CSS -->
+    <link rel="stylesheet" href="/static/css/hospital.css">
+
+    <style>
+        /* Emergency Alerts Page Styles */
+        .alerts-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .alerts-sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 240px;
+            min-height: 100vh;
+            background-color: var(--red-dark);
+            color: var(--white);
+            display: flex;
+            flex-direction: column;
+            padding: 24px 16px;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .alerts-sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 40px;
+            cursor: pointer;
+        }
+
+        .blood-drop-icon {
+            width: 32px;
+            height: 40px;
+            background-color: var(--white);
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            flex-shrink: 0;
+        }
+
+        .alerts-sidebar-logo span {
+            font-family: 'Playfair Display', serif;
+            font-size: 18px;
+            font-weight: 900;
+            color: var(--white);
+        }
+
+        .alerts-sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .alerts-nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: rgba(255, 255, 255, 0.65);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+            position: relative;
+            border-left: 3px solid transparent;
+        }
+
+        .alerts-nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+        }
+
+        .alerts-nav-link.active {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: var(--white);
+            border-left-color: var(--white);
+        }
+
+        .alerts-nav-link i {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .alerts-nav-badge {
+            margin-left: auto;
+            background-color: #FCA5A5;
+            color: var(--red);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .alerts-sidebar-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 16px;
+        }
+
+        .alerts-sidebar-footer p {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .alerts-logout-link {
+            color: #FCA5A5;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .alerts-logout-link:hover {
+            color: #FECACA;
+        }
+
+        /* Main Content */
+        .alerts-main-content {
+            margin-left: 240px;
+            width: calc(100% - 240px);
+            display: flex;
+            flex-direction: column;
+            height: auto;
+        }
+
+        /* Topbar */
+        .alerts-topbar {
+            background-color: var(--white);
+            padding: 16px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(44, 24, 16, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .alerts-topbar-left {
+            flex: 1;
+        }
+
+        .alerts-topbar-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--text);
+        }
+
+        .alerts-topbar-date {
+            font-size: 13px;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        .alerts-topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .alerts-page-body {
+            padding: 24px 28px;
+            background-color: var(--cream);
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* Filters */
+        .alerts-filters {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .alert-filter-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: var(--white);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .alert-filter-btn:hover,
+        .alert-filter-btn.active {
+            background: var(--red);
+            color: var(--white);
+            border-color: var(--red);
+        }
+
+        /* Emergency Alert Cards */
+        .emergency-alert {
+            background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+            border: 2px solid var(--red);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(185, 28, 28, 0.15);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .emergency-alert::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 10px,
+                rgba(185, 28, 28, 0.1) 10px,
+                rgba(185, 28, 28, 0.1) 20px
+            );
+            pointer-events: none;
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(20px); }
+        }
+
+        .emergency-alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .emergency-alert-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .alert-critical-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--red);
+            color: var(--white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .alert-title-text h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--red-dark);
+            margin-bottom: 4px;
+        }
+
+        .alert-title-text p {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .alert-badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-critical {
+            background: var(--red);
+            color: var(--white);
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .badge-patient {
+            background: rgba(185, 28, 28, 0.2);
+            color: var(--red-dark);
+        }
+
+        .badge-blood {
+            background: rgba(185, 28, 28, 0.15);
+            color: var(--red-dark);
+        }
+
+        /* Alert Details */
+        .emergency-alert-body {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .alert-info {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .alert-info-row {
+            display: flex;
+            gap: 16px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+        }
+
+        .alert-info-row i {
+            color: var(--red);
+            font-size: 16px;
+            min-width: 20px;
+        }
+
+        .alert-info-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .alert-info-label {
+            font-size: 11px;
+            color: var(--muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .alert-info-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        /* Countdown Timer */
+        .alert-countdown {
+            background: var(--red);
+            color: var(--white);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .countdown-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .countdown-timer {
+            font-family: 'Playfair Display', serif;
+            font-size: 36px;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .countdown-subtext {
+            font-size: 12px;
+            margin-top: 8px;
+            opacity: 0.85;
+        }
+
+        /* Alert Actions */
+        .emergency-alert-footer {
+            display: flex;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .alert-btn {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .alert-btn-respond {
+            background: var(--red);
+            color: var(--white);
+        }
+
+        .alert-btn-respond:hover {
+            background: var(--red-dark);
+            transform: translateY(-2px);
+        }
+
+        .alert-btn-call {
+            background: var(--white);
+            color: var(--red);
+            border: 2px solid var(--red);
+        }
+
+        .alert-btn-call:hover {
+            background: var(--red-light);
+        }
+
+        .alert-btn-details {
+            background: rgba(255, 255, 255, 0.5);
+            color: var(--text);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .alert-btn-details:hover {
+            background: var(--white);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .alerts-sidebar {
+                position: fixed;
+                left: -240px;
+                transition: left 0.3s ease;
+            }
+
+            .alerts-sidebar.open {
+                left: 0;
+            }
+
+            .alerts-main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .alerts-topbar {
+                padding: 12px 16px;
+            }
+
+            .alerts-topbar-title {
+                font-size: 20px;
+            }
+
+            .alerts-page-body {
+                padding: 16px;
+            }
+
+            .emergency-alert-body {
+                grid-template-columns: 1fr;
+            }
+
+            .alert-info-row {
+                padding: 10px;
+            }
+
+            .countdown-timer {
+                font-size: 28px;
+            }
+
+            .alerts-topbar-date {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .alerts-sidebar-logo span {
+                display: none;
+            }
+
+            .alerts-nav-link span {
+                display: none;
+            }
+
+            .alerts-nav-link {
+                justify-content: center;
+                padding: 12px;
+            }
+
+            .alerts-nav-badge {
+                margin: 0;
+            }
+
+            .emergency-alert-footer {
+                flex-direction: column;
+            }
+
+            .alert-btn {
+                width: 100%;
+            }
+
+            .emergency-alert-header {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .alert-badges {
+                order: -1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="alerts-wrapper">
+        <!-- SIDEBAR -->
+        <aside class="alerts-sidebar">
+            <div class="alerts-sidebar-logo">
+                <div class="blood-drop-icon"></div>
+                <span>BloodChain</span>
+            </div>
+
+            <!-- Nav Links -->
+            <nav class="alerts-sidebar-nav">
+                <a href="/hospital/dashboard/" class="alerts-nav-link">
+                    <i class="bi bi-house-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/hospital/stock/" class="alerts-nav-link">
+                    <i class="bi bi-droplet-fill"></i>
+                    <span>Blood Stock</span>
+                </a>
+                <a href="/hospital/requests/" class="alerts-nav-link">
+                    <i class="bi bi-list-check"></i>
+                    <span>Requests</span>
+                </a>
+                <a href="/alerts/emergency/" class="alerts-nav-link active">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <span>Emergency Alerts</span>
+                    <span class="alerts-nav-badge">3</span>
+                </a>
+                <a href="/hospital/donors/" class="alerts-nav-link">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    <span>Nearby Donors</span>
+                </a>
+                <a href="/hospital/profile/" class="alerts-nav-link">
+                    <i class="bi bi-building"></i>
+                    <span>Hospital Profile</span>
+                </a>
+            </nav>
+
+            <!-- Footer -->
+            <div class="alerts-sidebar-footer">
+                <p>Centre Hospitalier</p>
+                <a href="#" class="alerts-logout-link">Logout</a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <div class="alerts-main-content">
+            <!-- TOPBAR -->
+            <div class="alerts-topbar">
+                <div class="alerts-topbar-left">
+                    <div class="alerts-topbar-title">Emergency Alerts</div>
+                    <div class="alerts-topbar-date">May 23, 2026</div>
+                </div>
+                <div class="alerts-topbar-right">
+                    <i class="bi bi-bell-fill" style="color: var(--red); font-size: 18px;"></i>
+                </div>
+            </div>
+
+            <!-- PAGE BODY -->
+            <div class="alerts-page-body">
+                <!-- Filters -->
+                <div class="alerts-filters">
+                    <button class="alert-filter-btn active" onclick="filterAlerts('all')">All</button>
+                    <button class="alert-filter-btn" onclick="filterAlerts('critical')">Critical</button>
+                    <button class="alert-filter-btn" onclick="filterAlerts('urgent')">Urgent</button>
+                    <button class="alert-filter-btn" onclick="filterAlerts('pending')">Pending</button>
+                </div>
+
+                <!-- EMERGENCY ALERTS -->
+                <div id="alertsContainer">
+                    <!-- Alert 1: Critical Blood Request -->
+                    <div class="emergency-alert" data-severity="critical">
+                        <div class="emergency-alert-header">
+                            <div class="emergency-alert-title">
+                                <div class="alert-critical-icon">
+                                    <i class="bi bi-exclamation-lg"></i>
+                                </div>
+                                <div class="alert-title-text">
+                                    <h3>Critical Blood Request - ICU</h3>
+                                    <p>Patient: Jean Pierre Moukongo (ID: PAT-2024-001)</p>
+                                </div>
+                            </div>
+                            <div class="alert-badges">
+                                <span class="badge badge-critical">⏱ CRITICAL</span>
+                                <span class="badge badge-blood">O- (4 units)</span>
+                                <span class="badge badge-patient">Age: 45</span>
+                            </div>
+                        </div>
+
+                        <div class="emergency-alert-body">
+                            <div class="alert-info">
+                                <div class="alert-info-row">
+                                    <i class="bi bi-hospital"></i>
+                                    <div class="alert-info-text">
+                                        <span class="alert-info-label">Receiving Hospital</span>
+                                        <span class="alert-info-value">Centre Hospitalier de Yaoundé</span>
+                                    </div>
+                                </div>
+                                <div class="alert-info-row">
+                                    <i class="bi bi-person-fill"></i>
+                                    <div class="alert-info-text">
+                                        <span class="alert-info-label">Medical Department</span>
+                                        <span class="alert-info-value">Intensive Care Unit (ICU)</span>
+                                    </div>
+                                </div>
+                                <div class="alert-info-row">
+                                    <i class="bi bi-telephone-fill"></i>
+                                    <div class="alert-info-text">
+                                        <span class="alert-info-label">Contact Doctor</span>
+                                        <span class="alert-info-value">Dr. Antoine Dupuis - +237 674 856 923</span>
+                                    </div>
+                                </div>
+                                <div class="alert-info-row">
+                                    <i class="bi bi-file-earmark-text"></i>
+                                    <div class="alert-info-text">
+                                        <span class="alert-info-label">Medical Condition</span>
+                                        <span class="alert-info-value">Post-surgical hemorrhage, urgent transfusion required</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="alert-countdown">
+                                <div class="countdown-label">Time Remaining</div>
+                                <div class="countdown-timer" id="timer1">45:32</div>
+                                <div class="countdown-subtext">Critical window closing</div>
+                            </div>
+                        </div>
+
+                        <div class="emergency-alert-footer">
+                            <button class="alert-btn alert-btn-respond" onclick="respondAlert(1)">
+                                <i class="bi bi-check-circle-fill"></i>
+                                Respond Now
+                            </button>
+                            <button class="alert-btn alert-btn-call" onclick="callAlert(1)">
+                                <i class="bi bi-telephone-fill"></i>
+                                Call Hospital
+                            </button>
+                            <button class="alert-btn alert-btn-details" onclick="viewAlert(1)">
+                                <i class="bi bi-arrow-right-circle"></i>
+                                View Details
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Alert 2: Urgent Blood Request -->
+                    <div class="emergency-alert" data-severity="urgent">
+                        <div class="emergency-alert-header">
+                            <div class="emergency-alert-title">
+                                <div class="alert-critical-icon" style="background: var(--orange);">
+                                    <i class="bi bi-exclamation"></i>
+                                </div>
+                                <div class="alert-title-text">
+                                    <h3>Urgent Blood Requirement - Emergency</h3>
+                                    <p>Patient: Marie Kone (ID: PAT-2024-045)</p>
+                                </div>
+                            </div>
+                            <div class="alert-badges">
+                                <span class="badge" style="background: var(--orange); color: var(--white);">⏱ URGENT</span>
+                                <span class="badge badge-blood">A+ (3 units)</span>
+                                <span class="badge badge-patient">Age: 32</span>
+                            </div>
+                        </div>
+
+                        <div class="emergency-alert-body">
+                            <div class="alert-info">
+                                <div class="alert-info-row">
+                                    <i class="bi bi-hospital"></i>
+                                    <div class="alert-info-text">
+                                        <span class="alert-info-label">Receiving Hospital</span>
+                                        <span class="alert-info-value">Hôpital du Jour</span>
+                                    </div>
+                                </div>
+                                <div class="alert-info-row">
+                                    <i class="bi bi-person-fill"></i>
+                                    <div class="alert-info-text">
+                                        <span class="alert-info-label">Medical Department</span>
+                                        <span class="alert-info-value">Emergency Room (ER)</span>
+                                    </div>
+                                </div>
+                                <div class="alert-info-row">
+                                    <i class="bi bi-telephone-fill"></i>
+                                    <div class="alert-info-text">
+                                        <span class="alert-info-label">Contact Doctor</span>
+                                        <span class="alert-info-value">Dr. Marie Laurent - +237 698 234 567</span>
+                                    </div>
+                                </div>
+                                <div class="alert-info-row">
+                                    <i class="bi bi-file-earmark-text"></i>
+                                    <div class="alert-info-text">
+                                        <span class="alert-info-label">Medical Condition</span>
+                                        <span class="alert-info-value">Motor vehicle accident, multiple injuries</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="alert-countdown" style="background: var(--orange);">
+                                <div class="countdown-label">Time Remaining</div>
+                                <div class="countdown-timer" id="timer2">2:15:45</div>
+                                <div class="countdown-subtext">Urgent priority level</div>
+                            </div>
+                        </div>
+
+                        <div class="emergency-alert-footer">
+                            <button class="alert-btn alert-btn-respond" style="background: var(--orange);" onclick="respondAlert(2)">
+                                <i class="bi bi-check-circle-fill"></i>
+                                Respond Now
+                            </button>
+                            <button class="alert-btn alert-btn-call" onclick="callAlert(2)">
+                                <i class="bi bi-telephone-fill"></i>
+                                Call Hospital
+                            </button>
+                            <button class="alert-btn alert-btn-details" onclick="viewAlert(2)">
+                                <i class="bi bi-arrow-right-circle"></i>
+                                View Details
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Alert 3: Standard Priority -->
+                    <div class="emergency-alert" data-severity="pending">
+                        <div class="emergency-alert-header">
+                            <div class="emergency-alert-title">
+                                <div class="alert-critical-icon" style="background: var(--green);">
+                                    <i class="bi bi-info-circle"></i>
+                                </div>
+                                <div class="alert-title-text">
+                                    <h3>Standard Blood Request - Pending Response</h3>
+                                    <p>Patient: François Nguemeta (ID: PAT-2024-089)</p>
+                                </div>
+                            </div>
+                            <div class="alert-badges">
+                                <span class="badge" style="background: var(--green); color: var(--white);">STANDARD</span>
+                                <span class="badge badge-blood">B+ (2 units)</span>
+                                <span class="badge badge-patient">Age: 28</span>
+                            </div>
+                        </div>
+
+                        <div class="emergency-alert-body">
+                            <div class="alert-info">
+                                <div class="alert-info-row">
+                                    <i class="bi bi-hospital"></i>
+                                    <div class="alert-info-text">
+                                        <span class="alert-info-label">Receiving Hospital</span>
+                                        <span class="alert-info-value">Clinique de la Vie</span>
+                                    </div>
+                                </div>
+                                <div class="alert-info-row">
+                                    <i class="bi bi-person-fill"></i>
+                                    <div class="alert-info-text">
+                                        <span class="alert-info-label">Medical Department</span>
+                                        <span class="alert-info-value">General Ward</span>
+                                    </div>
+                                </div>
+                                <div class="alert-info-row">
+                                    <i class="bi bi-telephone-fill"></i>
+                                    <div class="alert-info-text">
+                                        <span class="alert-info-label">Contact Doctor</span>
+                                        <span class="alert-info-value">Dr. Sophie Dubois - +237 677 123 456</span>
+                                    </div>
+                                </div>
+                                <div class="alert-info-row">
+                                    <i class="bi bi-file-earmark-text"></i>
+                                    <div class="alert-info-text">
+                                        <span class="alert-info-label">Medical Condition</span>
+                                        <span class="alert-info-value">Surgical procedure, routine blood requirement</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="alert-countdown" style="background: var(--green);">
+                                <div class="countdown-label">Time Remaining</div>
+                                <div class="countdown-timer" id="timer3">12:30:00</div>
+                                <div class="countdown-subtext">Standard priority</div>
+                            </div>
+                        </div>
+
+                        <div class="emergency-alert-footer">
+                            <button class="alert-btn alert-btn-respond" style="background: var(--green);" onclick="respondAlert(3)">
+                                <i class="bi bi-check-circle-fill"></i>
+                                Respond Now
+                            </button>
+                            <button class="alert-btn alert-btn-call" onclick="callAlert(3)">
+                                <i class="bi bi-telephone-fill"></i>
+                                Call Hospital
+                            </button>
+                            <button class="alert-btn alert-btn-details" onclick="viewAlert(3)">
+                                <i class="bi bi-arrow-right-circle"></i>
+                                View Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Countdown timers
+        function updateTimers() {
+            const timers = [
+                { id: 'timer1', initial: 45 * 60 + 32 },
+                { id: 'timer2', initial: (2 * 60 + 15) * 60 + 45 },
+                { id: 'timer3', initial: (12 * 60 + 30) * 60 }
+            ];
+
+            timers.forEach(timer => {
+                let seconds = timer.initial;
+                setInterval(() => {
+                    if (seconds > 0) {
+                        seconds--;
+                        const hours = Math.floor(seconds / 3600);
+                        const minutes = Math.floor((seconds % 3600) / 60);
+                        const secs = seconds % 60;
+                        
+                        let timeString = '';
+                        if (hours > 0) {
+                            timeString = `${hours}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+                        } else {
+                            timeString = `${minutes}:${String(secs).padStart(2, '0')}`;
+                        }
+                        
+                        document.getElementById(timer.id).textContent = timeString;
+                    }
+                }, 1000);
+            });
+        }
+
+        // Filter alerts
+        function filterAlerts(severity) {
+            const alerts = document.querySelectorAll('.emergency-alert');
+            document.querySelectorAll('.alert-filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            alerts.forEach(alert => {
+                if (severity === 'all' || alert.dataset.severity === severity) {
+                    alert.style.display = 'block';
+                } else {
+                    alert.style.display = 'none';
+                }
+            });
+        }
+
+        // Alert actions
+        function respondAlert(alertId) {
+            alert(`Responding to emergency alert ${alertId}...`);
+        }
+
+        function callAlert(alertId) {
+            alert(`Calling hospital for emergency alert ${alertId}...`);
+        }
+
+        function viewAlert(alertId) {
+            alert(`Viewing full details for emergency alert ${alertId}...`);
+        }
+
+        // Initialize
+        updateTimers();
+    </script>
+</body>
+</html>

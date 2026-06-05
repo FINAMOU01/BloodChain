@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donor Dashboard — BloodChain</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/static/css/donor.css">
+</head>
+<body>
+<div class="d-flex">
+    <aside class="sidebar">
+        <div class="sidebar-logo"><div class="blood-drop-icon"></div><span>BloodChain</span></div>
+        <nav class="sidebar-nav">
+            <a href="/donor/dashboard/" class="nav-link active"><i class="bi bi-house-fill"></i><span>Dashboard</span></a>
+            <a href="/donor/history/" class="nav-link"><i class="bi bi-heart-pulse"></i><span>My Donations</span></a>
+            <a href="/donor/hospitals/" class="nav-link"><i class="bi bi-hospital"></i><span>Nearby Hospitals</span></a>
+            <a href="/donor/appointments/" class="nav-link"><i class="bi bi-calendar-check"></i><span>Appointments</span></a>
+            <a href="/donor/eligibility/" class="nav-link"><i class="bi bi-shield-check"></i><span>My Eligibility</span></a>
+            <a href="/donor/rewards/" class="nav-link"><i class="bi bi-gift"></i><span>Rewards & Points</span></a>
+            <a href="/donor/alerts/" class="nav-link"><i class="bi bi-exclamation-triangle-fill"></i><span>Emergency Alerts</span></a>
+            <a href="/donor/notifications/" class="nav-link"><i class="bi bi-bell-fill"></i><span>Notifications</span><span class="nav-badge" id="nav-badge"></span></a>
+            <a href="/donor/profile/" class="nav-link"><i class="bi bi-gear-fill"></i><span>Settings</span></a>
+        </nav>
+        <div class="sidebar-footer"><p id="sidebar-name">Donor</p><a href="/login/" class="logout-link" id="logout-link">Logout</a></div>
+    </aside>
+    <main class="main-content">
+        <header class="topbar">
+            <div class="topbar-left"><h1 class="topbar-title">Dashboard</h1></div>
+            <div class="topbar-right">
+                <span class="topbar-date" id="current-date"></span>
+                <div class="topbar-notification"><i class="bi bi-bell-fill"></i><span class="notification-badge" id="topbar-badge"></span></div>
+                <div class="topbar-avatar" id="avatar">D</div>
+            </div>
+        </header>
+        <div class="page-body">
+            <div class="stats-grid">
+                <div class="stat-card" style="border-left-color: var(--red);">
+                    <div class="stat-label">Total Donations</div>
+                    <div class="stat-value" id="stat-total-donations">0</div>
+                    <div class="stat-small">Lifetime contributions</div>
+                </div>
+                <div class="stat-card" style="border-left-color: var(--green);">
+                    <div class="stat-label">Units Donated</div>
+                    <div class="stat-value" id="stat-total-volume">0</div>
+                    <div class="stat-small">Total blood volume</div>
+                </div>
+                <div class="stat-card" style="border-left-color: var(--orange);">
+                    <div class="stat-label">Next Eligible Date</div>
+                    <div class="stat-value" id="stat-next-eligible">-</div>
+                    <div class="stat-small" id="stat-eligible-status">Checking...</div>
+                </div>
+                <div class="stat-card" style="border-left-color: var(--red);">
+                    <div class="stat-label">Reward Points</div>
+                    <div class="stat-value" id="stat-points">0</div>
+                    <div class="stat-small">Available to redeem</div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+<script>
+const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
+const DONOR_EMAIL = localStorage.getItem('donor_email') || storedUser?.email;
+const isAuthenticated = Boolean(localStorage.getItem('token') && DONOR_EMAIL);
+
+if (!isAuthenticated) {
+    window.location.replace('/login/');
+}
+
+document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+
+document.getElementById('logout-link').addEventListener('click', function(e) {
+    e.preventDefault();
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('donor_email');
+    localStorage.removeItem('hospital_email');
+    window.location.replace('/login/');
+});
+
+function loadDashboard() {
+    if (!isAuthenticated) {
+        return;
+    }
+
+    Promise.all([
+        fetch(`/api/tracking/bags/donor/${DONOR_EMAIL}/`).then(r=>r.json()).catch(()=>[]),
+        fetch(`/api/donor/eligibility/${DONOR_EMAIL}/`).then(r=>r.json()).catch(()=>({})),
+        fetch(`/api/rewards/rewards/?donor_id=${DONOR_EMAIL}`).then(r=>r.json()).catch(()=>[]),
+        fetch(`/api/notifications/list/`).then(r=>r.json()).catch(()=>[])
+    ]).then(([bags, eligibility, rewards, notifications]) => {
+        const totalBags = bags.length;
+        const totalVol = bags.reduce((s,b)=>s+(b.volume_ml||450), 0);
+        const totalPoints = rewards.reduce((s,r)=>s+r.points, 0);
+        const notifCount = notifications.filter(n=>!n.is_sent).length;
+
+        document.getElementById('stat-total-donations').textContent = totalBags;
+        document.getElementById('stat-total-volume').textContent = totalVol ? totalVol + ' mL' : '0';
+        document.getElementById('stat-next-eligible').textContent = eligibility.next_eligible_date || '-';
+        document.getElementById('stat-eligible-status').textContent = eligibility.is_eligible ? 'Ready to donate' : `${eligibility.days_until_next || 0} days remaining`;
+        document.getElementById('stat-points').textContent = totalPoints || 0;
+        document.getElementById('nav-badge').textContent = notifCount || '';
+        document.getElementById('topbar-badge').textContent = notifCount || '';
+        document.getElementById('sidebar-name').textContent = DONOR_EMAIL;
+        document.getElementById('avatar').textContent = DONOR_EMAIL.charAt(0).toUpperCase();
+    }).catch(err => console.error('Dashboard load error', err));
+}
+document.addEventListener('DOMContentLoaded', loadDashboard);
+</script>
+</body>
+</html>
