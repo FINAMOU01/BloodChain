@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana-ingress
+  namespace: monitoring
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+    traefik.ingress.kubernetes.io/router.middlewares: monitoring-grafana-stripprefix@kubernetescrd
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: 207.180.220.145
+      http:
+        paths:
+          - path: /grafana
+            pathType: Prefix
+            backend:
+              service:
+                name: monitoring-grafana
+                port:
+                  number: 80
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: grafana-stripprefix
+  namespace: monitoring
+spec:
+  stripPrefix:
+    prefixes:
+      - /grafana
