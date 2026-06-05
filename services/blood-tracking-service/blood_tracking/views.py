@@ -4,6 +4,7 @@ from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
 from .models import BloodBag
 from .serializers import BloodBagSerializer
+from metrics.exporters import BLOOD_BAGS_COLLECTED
 
 class BloodBagCreateView(APIView):
     @swagger_auto_schema(
@@ -15,6 +16,7 @@ class BloodBagCreateView(APIView):
         serializer = BloodBagSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(status='collected')
+            BLOOD_BAGS_COLLECTED.inc()
             return Response({'bag_id': serializer.instance.bag_id}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

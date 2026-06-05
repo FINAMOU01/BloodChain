@@ -5,6 +5,7 @@ from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
 from .models import Donor, Appointment
 from .serializers import DonorSerializer, AppointmentSerializer
+from metrics.exporters import DONOR_REGISTRATIONS
 
 class DonorCreateView(APIView):
     @swagger_auto_schema(
@@ -16,6 +17,7 @@ class DonorCreateView(APIView):
         serializer = DonorSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
+            DONOR_REGISTRATIONS.inc()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -59,6 +61,11 @@ class AppointmentCreateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class AppointmentUpdateView(APIView):
+    @swagger_auto_schema(
+        request_body=AppointmentSerializer,
+        operation_description='Update appointment status or details. Partial updates supported.',
+        responses={200: AppointmentSerializer, 400: 'Validation error', 404: 'Appointment not found'}
+    )
     def patch(self, request, pk):
         try:
             appointment = Appointment.objects.get(pk=pk)

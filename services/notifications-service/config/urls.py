@@ -1,6 +1,8 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.http import JsonResponse
+from django.conf import settings
+from django.views.static import serve
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
@@ -10,12 +12,11 @@ def health(request):
 
 schema_view = get_schema_view(
     openapi.Info(
-        title='Notifications Service API',
+        title="Notifications Service API",
         default_version='v1',
-        description='BloodChain Notifications Microservice',
     ),
     public=True,
-    permission_classes=[permissions.AllowAny],
+    permission_classes=(permissions.AllowAny,),
 )
 
 urlpatterns = [
@@ -23,5 +24,6 @@ urlpatterns = [
     path('', include('django_prometheus.urls')),
     path('admin/', admin.site.urls),
     path('api/notifications/', include('app.urls')),
-    path('api/docs/', schema_view.with_ui('swagger'), name='swagger-ui'),
+    path('api/docs/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
 ]

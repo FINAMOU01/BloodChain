@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
+    'drf_yasg',
     'corsheaders',
     'app',
 ]
@@ -125,6 +126,10 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = 'staticfiles/'
+
+SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': False,
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

@@ -55,7 +55,7 @@ echo "Static files collected."
 echo "Starting Gunicorn server..."
 gunicorn config.wsgi:application \
     --bind 0.0.0.0:8000 \
-    --workers 4 \
+    --workers ${GUNICORN_WORKERS:-4} \
     --timeout 120 \
     --access-logfile - \
     --error-logfile -

@@ -9,6 +9,8 @@ urlpatterns = [
     path('login/', views.login_view),
     path('register/', views.register_view),
     path('', views.index),
+    path('about/', views.about),
+    path('donor/', views.donor_info),
     path('register/donor/', views.register_donor),
     path('register/hospital/', views.register_hospital),
       # Donor URLs

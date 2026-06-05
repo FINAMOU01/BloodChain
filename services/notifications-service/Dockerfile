@@ -49,6 +49,7 @@ COPY --chown=bloodchain:bloodchain . .
 
 # Create staticfiles directory
 RUN mkdir -p /app/staticfiles && \
+    chown bloodchain:bloodchain /app && \
     chown -R bloodchain:bloodchain /app/staticfiles
 
 # Switch to non-root user

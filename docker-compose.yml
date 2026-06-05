@@ -101,6 +101,7 @@ services:
       DB_NAME: ${DB_NAME:-bloodchain}
       REDIS_URL: redis://redis:6379/1
       ALLOWED_HOSTS: localhost,127.0.0.1,donor-service
+      GUNICORN_WORKERS: 1
     ports:
       - "8001:8000"
     depends_on:
@@ -133,6 +134,7 @@ services:
       DB_NAME: ${DB_NAME:-bloodchain}
       REDIS_URL: redis://redis:6379/2
       ALLOWED_HOSTS: localhost,127.0.0.1,hospital-service
+      GUNICORN_WORKERS: 1
     ports:
       - "8002:8000"
     depends_on:
@@ -165,6 +167,7 @@ services:
       DB_NAME: ${DB_NAME:-bloodchain}
       REDIS_URL: redis://redis:6379/3
       ALLOWED_HOSTS: localhost,127.0.0.1,blood-tracking-service
+      GUNICORN_WORKERS: 1
     ports:
       - "8003:8000"
     depends_on:
@@ -197,6 +200,7 @@ services:
       DB_NAME: ${DB_NAME:-bloodchain}
       REDIS_URL: redis://redis:6379/4
       ALLOWED_HOSTS: localhost,127.0.0.1,notifications-service
+      GUNICORN_WORKERS: 1
     ports:
       - "8004:8000"
     depends_on:
@@ -412,6 +416,54 @@ services:
       - bloodchain-network
     restart: unless-stopped
 
+  # ============================================================================
+  # MONITORING SERVICES
+  # ============================================================================
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: bloodchain-prometheus
+    volumes:
+      - ./infra/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./infra/monitoring/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    depends_on:
+      - donor-service
+      - hospital-service
+      - blood-tracking-service
+      - notifications-service
+      - data-warehouse
+      - location-service
+      - rewards-service
+      - user-management
+    networks:
+      - bloodchain-network
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: bloodchain-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_INSTALL_PLUGINS: 'grafana-piechart-panel'
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - bloodchain-network
+    restart: unless-stopped
+
 # ============================================================================
 # VOLUMES
 # ============================================================================
@@ -421,6 +473,8 @@ volumes:
   redis_data:
   mongo_data:
   clickhouse_data:
+  prometheus_data:
+  grafana_data:
 
 # ============================================================================
 # NETWORKS

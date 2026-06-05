@@ -4,41 +4,7 @@ from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
 from .models import Hospital, BloodRequest, BloodStock
 from .serializers import HospitalSerializer, BloodRequestSerializer, BloodStockSerializer
-
-class HospitalProfileView(APIView):
-    def get(self, request, email):
-        try:
-            hospital = Hospital.objects.get(contact_email=email)
-            return Response(HospitalSerializer(hospital).data)
-        except Hospital.DoesNotExist:
-            # Return a minimal profile so the frontend can display and edit
-            return Response({
-                "name": "",
-                "location": "",
-                "contact_email": email,
-                "contact_phone": "",
-                "is_active": True,
-                "registered_at": None
-            })
-
-class HospitalUpdateView(APIView):
-    @swagger_auto_schema(
-        request_body=HospitalSerializer,
-        operation_description='Update or create hospital profile. Partial updates supported.',
-        responses={200: HospitalSerializer, 400: 'Validation error'}
-    )
-    def patch(self, request, email):
-        data = request.data.copy()
-        data['contact_email'] = data.get('contact_email', email)
-        try:
-            hospital = Hospital.objects.get(contact_email=email)
-            serializer = HospitalSerializer(hospital, data=data, partial=True)
-        except Hospital.DoesNotExist:
-            serializer = HospitalSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+from metrics.exporters import BLOOD_REQUESTS_CREATED
 
 class HospitalCreateView(APIView):
     @swagger_auto_schema(
@@ -53,6 +19,31 @@ class HospitalCreateView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class HospitalProfileView(APIView):
+    def get(self, request, email):
+        try:
+            hospital = Hospital.objects.get(email=email)
+            return Response(HospitalSerializer(hospital).data)
+        except Hospital.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+class HospitalUpdateView(APIView):
+    @swagger_auto_schema(
+        request_body=HospitalSerializer,
+        operation_description='Update hospital profile details. Partial updates supported.',
+        responses={200: HospitalSerializer, 400: 'Validation error', 404: 'Hospital not found'}
+    )
+    def patch(self, request, email):
+        try:
+            hospital = Hospital.objects.get(email=email)
+        except Hospital.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = HospitalSerializer(hospital, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class BloodRequestCreateView(APIView):
     @swagger_auto_schema(
         request_body=BloodRequestSerializer,
@@ -63,6 +54,7 @@ class BloodRequestCreateView(APIView):
         serializer = BloodRequestSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(status='pending')
+            BLOOD_REQUESTS_CREATED.inc()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -81,6 +73,11 @@ class BloodRequestDetailView(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
 class BloodRequestUpdateView(APIView):
+    @swagger_auto_schema(
+        request_body=BloodRequestSerializer,
+        operation_description='Update blood request status or details. Partial updates supported.',
+        responses={200: BloodRequestSerializer, 400: 'Validation error', 404: 'Blood request not found'}
+    )
     def patch(self, request, pk):
         try:
             req = BloodRequest.objects.get(pk=pk)
