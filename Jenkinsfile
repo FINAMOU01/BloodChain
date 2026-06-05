@@ -142,10 +142,25 @@ pipeline {
                         ]
 
                         services.each { name ->
-                            sh """
-                                docker push ${DOCKER_HUB_USER}/${IMAGE_PREFIX}-${name}:${env.GIT_COMMIT}
-                                docker push ${DOCKER_HUB_USER}/${IMAGE_PREFIX}-${name}:latest
-                            """
+                            def image = "${DOCKER_HUB_USER}/${IMAGE_PREFIX}-${name}"
+                            def commitTag = "${image}:${env.GIT_COMMIT}"
+                            def latestTag = "${image}:latest"
+
+                            def imageExists = sh(
+                                script: "docker image inspect ${latestTag} > /dev/null 2>&1",
+                                returnStatus: true
+                            ) == 0
+
+                            if (imageExists) {
+                                echo "Pushing ${name} (local image found)..."
+                                sh """
+                                    docker tag ${latestTag} ${commitTag}
+                                    docker push ${commitTag}
+                                    docker push ${latestTag}
+                                """
+                            } else {
+                                echo "WARNING: No local image found for ${name} (${latestTag}) — skipping push."
+                            }
                         }
                     }
                 }
