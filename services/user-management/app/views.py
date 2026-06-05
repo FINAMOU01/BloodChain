@@ -3,6 +3,7 @@ from rest_framework import viewsets, status, views
 from rest_framework.response import Response
 from .models import User, Token
 from rest_framework.permissions import AllowAny
+from drf_yasg.utils import swagger_auto_schema
 
 from .serializers import UserSerializer, RegisterSerializer, LoginSerializer
 
@@ -14,6 +15,11 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class RegisterView(views.APIView):
     permission_classes = [AllowAny]
+    @swagger_auto_schema(
+        request_body=RegisterSerializer,
+        operation_description='Register a new user (donor or hospital).',
+        responses={201: 'User registered with token', 400: 'Validation error'}
+    )
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
@@ -32,6 +38,11 @@ class RegisterView(views.APIView):
 
 class LoginView(views.APIView):
     permission_classes = [AllowAny]
+    @swagger_auto_schema(
+        request_body=LoginSerializer,
+        operation_description='Login with email and password, returns auth token.',
+        responses={200: 'Login successful with token', 401: 'Invalid credentials'}
+    )
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():

@@ -137,3 +137,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = 'staticfiles/'
+
+SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': False,
+}

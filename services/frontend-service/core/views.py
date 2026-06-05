@@ -5,6 +5,12 @@ from django.http import JsonResponse
 def index(request):
     return render(request, 'index.html')
 
+def about(request):
+    return render(request, 'about.html')
+
+def donor_info(request):
+    return render(request, 'donor.html')
+
 
 def login_view(request):
     return render(request, 'login.html')

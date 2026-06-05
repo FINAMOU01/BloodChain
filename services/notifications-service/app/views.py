@@ -4,6 +4,7 @@ from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
 from .serializers import NotificationSerializer
 from .models import Notification
+from metrics.exporters import EMERGENCY_ALERTS_SENT
 
 class EmergencyAlertView(APIView):
     @swagger_auto_schema(
@@ -17,8 +18,9 @@ class EmergencyAlertView(APIView):
         serializer = NotificationSerializer(data=request.data)
         if serializer.is_valid():
             notification = serializer.save(is_emergency=True)
-            send_emergency_alert.delay(notification.id)
-            send_push_notification.delay(notification.id)
+            EMERGENCY_ALERTS_SENT.inc()
+            send_emergency_alert(notification.id)
+            send_push_notification(notification.id)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

@@ -136,6 +136,10 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = 'staticfiles/'
 
+SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': False,
+}
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/6.0/ref/settings/#default-auto-field
 
