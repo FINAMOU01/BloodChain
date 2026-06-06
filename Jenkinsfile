@@ -180,17 +180,7 @@ pipeline {
                             keyFileVariable: 'SSH_KEY'
                         )
                     ]) {
-                        sh """
-                            rsync -avz -e "ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no" \
-                                infra/k3s/manifests/ \
-                                root@${K3S_SERVER}:/opt/bloodchain/infra/k3s/manifests/
-                            ssh -i ${SSH_KEY} \
-                                -o StrictHostKeyChecking=no \
-                                root@${K3S_SERVER} \
-                                'kubectl apply -f /opt/bloodchain/infra/k3s/manifests/ \
-                                 && kubectl rollout status deployment \
-                                    -n bloodchain --timeout=120s'
-                        """
+                        sh 'ssh -i $SSH_KEY -o StrictHostKeyChecking=no root@$K3S_SERVER '\''kubectl apply -f /opt/bloodchain/infra/k3s/manifests/ && kubectl rollout status deployment -n bloodchain --timeout=120s'\'''
                     }
                 }
                 echo '✅ Deployment complete.'
