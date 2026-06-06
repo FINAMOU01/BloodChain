@@ -181,6 +181,9 @@ pipeline {
                         )
                     ]) {
                         sh """
+                            rsync -avz -e "ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no" \
+                                infra/k3s/manifests/ \
+                                root@${K3S_SERVER}:/opt/bloodchain/infra/k3s/manifests/
                             ssh -i ${SSH_KEY} \
                                 -o StrictHostKeyChecking=no \
                                 root@${K3S_SERVER} \

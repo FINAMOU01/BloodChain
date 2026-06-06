@@ -25,7 +25,7 @@ spec:
       containers:
         - name: blockchain-gateway
           image: finamou/bloodchain-blockchain-gateway:latest
-          command: ["sh", "-c", "python blockchain_service.py; tail -f /dev/null"]
+          command: ["python", "app.py"]
           ports:
             - containerPort: 8000
           envFrom:

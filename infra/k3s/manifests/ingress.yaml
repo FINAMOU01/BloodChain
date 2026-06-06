@@ -23,14 +23,14 @@ spec:
                 name: user-management
                 port:
                   number: 8000
-          - path: /api/donors/
+          - path: /api/donor/
             pathType: Prefix
             backend:
               service:
                 name: donor-service
                 port:
                   number: 8000
-          - path: /api/hospitals/
+          - path: /api/hospital/
             pathType: Prefix
             backend:
               service:
