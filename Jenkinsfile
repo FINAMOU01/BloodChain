@@ -180,7 +180,9 @@ pipeline {
                             keyFileVariable: 'SSH_KEY'
                         )
                     ]) {
-                        sh 'ssh -i $SSH_KEY -o StrictHostKeyChecking=no root@$K3S_SERVER '\''kubectl apply -f /opt/bloodchain/infra/k3s/manifests/ && kubectl rollout status deployment -n bloodchain --timeout=120s'\'''
+                        sh 'ssh -i $SSH_KEY -o StrictHostKeyChecking=no root@$K3S_SERVER '\''kubectl get deployments -n bloodchain'\'''
+                        sh 'ssh -i $SSH_KEY -o StrictHostKeyChecking=no root@$K3S_SERVER '\''kubectl apply -f /opt/bloodchain/infra/k3s/manifests/ -n bloodchain -v=8'\'''
+                        sh 'ssh -i $SSH_KEY -o StrictHostKeyChecking=no root@$K3S_SERVER '\''kubectl rollout status deployment -n bloodchain --timeout=120s'\'''
                     }
                 }
                 echo '✅ Deployment complete.'
